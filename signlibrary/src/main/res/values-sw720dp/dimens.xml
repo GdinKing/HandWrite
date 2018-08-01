@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="sign_actionbar_height">54dp</dimen>
+    <dimen name="sign_actionbar_text_size">18sp</dimen>
+    <dimen name="sign_tool_padding">15dp</dimen>
+    <dimen name="grid_toolbar_height">60dp</dimen>
+    <dimen name="grid_size">350dp</dimen>
+    <dimen name="sign_tool_icon_size">50sp</dimen>
+
+    <dimen name="seal_text_size">24sp</dimen>
+    <dimen name="seal_time_text_size">22sp</dimen>
+    <dimen name="seal_small_time_text_size">20sp</dimen>
+    <dimen name="seal_small_text_size">22sp</dimen>
+</resources>

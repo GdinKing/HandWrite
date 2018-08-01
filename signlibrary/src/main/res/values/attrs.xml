@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CircleView">
+        <attr name="penColor" format="color"/>
+        <attr name="outBorderColor" format="color"/>
+        <attr name="radius" format="integer"/>
+        <attr name="showBorder" format="boolean"/>
+        <attr name="showOutBorder" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="SealView">
+        <attr name="sealColor" format="color"/>
+        <attr name="sealTextSize" format="dimension"/>
+        <attr name="sealName" format="string"/>
+        <attr name="borderWidth" format="dimension"/>
+        <attr name="timeTextSize" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="CircleImageView">
+        <attr name="civ_border_width" format="dimension" />
+        <attr name="civ_border_color" format="color" />
+        <attr name="civ_border_overlay" format="boolean" />
+        <attr name="civ_fill_color" format="color" />
+        <attr name="civ_circle_background_color" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="HVScrollView">
+        <!--水平内容宽度是否充满，默认false自适应-->
+        <attr name="fillViewportH" format="boolean" />
+        <!--垂直内容高度是否充满，默认false自适应-->
+        <attr name="fillViewportV" format="boolean" />
+        <!--滚动方向，默认both双向滚动-->
+        <attr name="scrollOrientation">
+            <enum name="none" value="0" />
+            <enum name="horizontal" value="1" />
+            <enum name="vertical" value="2" />
+            <enum name="both" value="3" />
+        </attr>
+        <!--内容是否居中显示，默认右上角对齐-->
+        <attr name="childLayoutCenter" format="boolean" />
+    </declare-styleable>
+</resources>

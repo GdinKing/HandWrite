@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.king.signature">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application>
+        <activity
+            android:name=".ui.GridPaintActivity"
+            android:configChanges="screenSize|keyboard|keyboardHidden|orientation"
+            android:theme="@style/HandWriteTheme"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" />
+
+        <activity
+            android:name=".ui.PaintActivity"
+            android:configChanges="screenSize|orientation|keyboard|keyboardHidden"
+            android:hardwareAccelerated="false"
+            android:theme="@style/HandWriteTheme" />
+    </application>
+
+</manifest>

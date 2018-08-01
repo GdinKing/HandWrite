@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sign_bg">
+
+    <include
+        android:id="@+id/actionbar"
+        layout="@layout/sign_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sign_actionbar_height" />
+
+    <LinearLayout
+        android:id="@+id/setting"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/grid_toolbar_height"
+        android:layout_below="@id/actionbar"
+        android:background="@drawable/bg_shape"
+        android:gravity="right|center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="10dp">
+
+        <android.king.signature.view.CircleImageView
+            android:id="@+id/btn_pen"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_marginRight="@dimen/sign_tool_padding"
+            android:background="@drawable/bg_btn_clicked"
+            android:src="@drawable/sign_ic_pen" />
+
+        <android.king.signature.view.CircleImageView
+            android:id="@+id/btn_undo"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_marginRight="@dimen/sign_tool_padding"
+            android:background="@drawable/bg_btn_clicked"
+            android:src="@drawable/sign_ic_undo" />
+
+        <android.king.signature.view.CircleImageView
+            android:id="@+id/btn_redo"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_marginRight="@dimen/sign_tool_padding"
+            android:background="@drawable/bg_btn_clicked"
+            android:src="@drawable/sign_ic_redo" />
+
+        <android.king.signature.view.CircleImageView
+            android:id="@+id/btn_clear"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_marginRight="@dimen/sign_tool_padding"
+            android:background="@drawable/bg_btn_clicked"
+            android:src="@drawable/sign_ic_clear" />
+
+        <android.king.signature.view.CircleView
+            android:id="@+id/btn_setting"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            app:radius="20"
+            app:showOutBorder="true" />
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/sign_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/setting"
+        android:layout_centerInParent="true">
+
+        <android.king.signature.view.HVScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fadingEdge="none"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            app:childLayoutCenter="false"
+            app:fillViewportH="false"
+            app:fillViewportV="false"
+            app:scrollOrientation="both">
+
+            <android.king.signature.view.PaintView
+                android:id="@+id/paint_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </android.king.signature.view.HVScrollView>
+
+        <android.king.signature.view.SealView
+            android:id="@+id/seal_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/scrollView"
+            android:layout_alignRight="@id/scrollView"
+            android:layout_margin="10dp"
+            app:borderWidth="2dp" />
+    </RelativeLayout>
+
+</RelativeLayout>
