@@ -4,9 +4,11 @@
     <dimen name="sign_actionbar_height">60dp</dimen>
     <dimen name="sign_actionbar_text_size">20sp</dimen>
     <dimen name="sign_tool_padding">16dp</dimen>
-    <dimen name="grid_toolbar_height">60dp</dimen>
+    <dimen name="sign_grid_toolbar_height">60dp</dimen>
     <dimen name="grid_size">400dp</dimen>
-    <dimen name="sign_tool_icon_size">56sp</dimen>
+    <dimen name="sign_tool_icon_size">58dp</dimen>
+
+    <dimen name="sign_eraser_size">28dp</dimen>
 
     <dimen name="seal_text_size">24sp</dimen>
     <dimen name="seal_time_text_size">22sp</dimen>

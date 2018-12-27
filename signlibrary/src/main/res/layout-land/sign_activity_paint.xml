@@ -3,38 +3,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/sign_bg">
+    android:fitsSystemWindows="true"
+    android:id="@+id/rl_container"
+    android:clipToPadding="true"
+    android:background="@color/white">
 
     <include
         android:id="@+id/actionbar"
         layout="@layout/sign_actionbar"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="@dimen/sign_actionbar_height" />
-
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/setting"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/grid_toolbar_height"
+        android:layout_height="@dimen/sign_grid_toolbar_height"
         android:layout_below="@id/actionbar"
-        android:background="@drawable/bg_shape"
-        android:gravity="right|center_vertical"
         android:layout_margin="10dp"
-        android:orientation="horizontal">
+        android:background="@color/white"
+        android:gravity="right|center_vertical">
 
         <android.king.signature.view.CircleImageView
-            android:id="@+id/btn_pen"
+            android:id="@+id/btn_hand"
             android:layout_width="@dimen/sign_tool_icon_size"
             android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_alignParentLeft="true"
             android:layout_marginRight="@dimen/sign_tool_padding"
-            android:background="@drawable/bg_btn_clicked"
-            android:src="@drawable/sign_ic_pen" />
+            android:background="@drawable/sign_bg_btn_clicked"
+            android:src="@drawable/sign_ic_hand" />
+
 
         <android.king.signature.view.CircleImageView
             android:id="@+id/btn_undo"
             android:layout_width="@dimen/sign_tool_icon_size"
             android:layout_height="@dimen/sign_tool_icon_size"
             android:layout_marginRight="@dimen/sign_tool_padding"
-            android:background="@drawable/bg_btn_clicked"
+            android:layout_toLeftOf="@+id/btn_redo"
+            android:background="@drawable/sign_bg_btn_clicked"
             android:src="@drawable/sign_ic_undo" />
 
         <android.king.signature.view.CircleImageView
@@ -42,31 +47,45 @@
             android:layout_width="@dimen/sign_tool_icon_size"
             android:layout_height="@dimen/sign_tool_icon_size"
             android:layout_marginRight="@dimen/sign_tool_padding"
-            android:background="@drawable/bg_btn_clicked"
-            android:src="@drawable/sign_ic_redo"/>
-
+            android:layout_toLeftOf="@+id/btn_clear"
+            android:background="@drawable/sign_bg_btn_clicked"
+            android:src="@drawable/sign_ic_redo" />
 
         <android.king.signature.view.CircleImageView
             android:id="@+id/btn_clear"
             android:layout_width="@dimen/sign_tool_icon_size"
             android:layout_height="@dimen/sign_tool_icon_size"
             android:layout_marginRight="@dimen/sign_tool_padding"
-            android:background="@drawable/bg_btn_clicked"
+            android:layout_toLeftOf="@+id/btn_pen"
+            android:background="@drawable/sign_bg_btn_clicked"
             android:src="@drawable/sign_ic_clear" />
+
+        <android.king.signature.view.CircleImageView
+            android:id="@+id/btn_pen"
+            android:layout_width="@dimen/sign_tool_icon_size"
+            android:layout_height="@dimen/sign_tool_icon_size"
+            android:layout_marginRight="@dimen/sign_tool_padding"
+            android:layout_toLeftOf="@+id/btn_setting"
+            android:background="@drawable/sign_bg_btn_clicked"
+            android:src="@drawable/sign_ic_pen" />
 
         <android.king.signature.view.CircleView
             android:id="@+id/btn_setting"
             android:layout_width="@dimen/sign_tool_icon_size"
             android:layout_height="@dimen/sign_tool_icon_size"
-            app:radius="20"
-            app:showOutBorder="true" />
-    </LinearLayout>
+            android:layout_alignParentRight="true"
+            app:showOutBorder="true"
+            app:sizeLevel="2" />
+
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:id="@+id/sign_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/setting"
+        android:background="@drawable/sign_bg_shape"
         android:layout_centerInParent="true"
         android:layout_marginLeft="10dp"
         android:layout_marginBottom="10dp"
@@ -81,7 +100,7 @@
             android:fadingEdge="none"
             android:scrollbars="none"
             android:overScrollMode="never"
-            android:background="@drawable/bg_shape"
+            android:background="@drawable/sign_bg_shape"
             android:layout_centerInParent="true"
             app:childLayoutCenter="false"
             app:fillViewportH="false"
@@ -102,8 +121,14 @@
             android:layout_alignRight="@id/scrollView"
             android:layout_margin="10dp"
             app:borderWidth="2dp" />
+
     </RelativeLayout>
 
-
+    <android.king.signature.view.EraserView
+        android:layout_width="@dimen/sign_eraser_size"
+        android:layout_height="@dimen/sign_eraser_size"
+        android:layout_alignTop="@+id/sign_container"
+        android:layout_alignLeft="@+id/sign_container"
+        android:id="@+id/eraser"/>
 
 </RelativeLayout>

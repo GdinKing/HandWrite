@@ -1,34 +1,36 @@
-package android.king.signature.ui;
+package android.king.signature;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.king.signature.R;
-import android.king.signature.config.PenConfig;
-import android.king.signature.util.BitmapUtil;
 import android.king.signature.util.DisplayUtil;
-import android.king.signature.util.StatusBarCompat;
-import android.king.signature.util.SystemUtil;
-import android.king.signature.view.CircleView;
-import android.king.signature.view.PaintView;
-import android.king.signature.view.CircleImageView;
-import android.king.signature.view.PaintSettingWindow;
-import android.king.signature.view.SealView;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
+
+import android.king.signature.config.PenConfig;
+import android.king.signature.util.BitmapUtil;
+import android.king.signature.util.StatusBarCompat;
+import android.king.signature.util.SystemUtil;
+import android.king.signature.view.CircleImageView;
+import android.king.signature.view.CircleView;
+import android.king.signature.view.GuideView;
+import android.king.signature.view.PaintSettingWindow;
+import android.king.signature.view.PaintView;
+import android.king.signature.view.SealView;
+
 
 /**
  * 空白手写画板
@@ -41,13 +43,14 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     /**
      * 画布最大宽度
      */
-    private static final int CANVAS_MAX_WIDTH = 3000;
+    public static final int CANVAS_MAX_WIDTH = 3000;
     /**
      * 画布最大高度
      */
-    private static final int CANVAS_MAX_HEIGHT = 3000;
+    public static final int CANVAS_MAX_HEIGHT = 3000;
 
     private View mContainerView;
+    private CircleImageView mHandView;
     private CircleImageView mUndoView;
     private CircleImageView mRedoView;
     private CircleImageView mPenView;
@@ -64,16 +67,16 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     private String mSavePath;
     private boolean hasSize = false;
 
-    private float widthRate;
-    private float heightRate;
+    private float mWidth;
+    private float mHeight;
+    private float widthRate = 1.0f;
+    private float heightRate = 1.0f;
     private int bgColor;
     private boolean showSeal;
     private boolean isCrop;
     private String format;
 
-    /**
-     * 画笔设置
-     */
+
     private PaintSettingWindow settingWindow;
 
     @Override
@@ -83,42 +86,13 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     protected void initView() {
-        PenConfig.PAINT_COLOR = PenConfig.getPaintColor(this);
-        PenConfig.PAINT_SIZE = PenConfig.getPaintSize(this);
-
-        isCrop = getIntent().getBooleanExtra("crop", false);
-        String sealName = getIntent().getStringExtra("sealName");
-        format = getIntent().getStringExtra("format");
-        boolean showSealTime = getIntent().getBooleanExtra("showSealTime", false);
-        bgColor = getIntent().getIntExtra("background", Color.TRANSPARENT);
-        String mInitPath = getIntent().getStringExtra("image");
-        int bitmapWidth = getIntent().getIntExtra("bitmapWidth", 0);
-        int bitmapHeight = getIntent().getIntExtra("bitmapHeight", 0);
-        widthRate = getIntent().getFloatExtra("widthRate", 1.0f);
-        heightRate = getIntent().getFloatExtra("heightRate", 1.0f);
-        if (bitmapWidth > CANVAS_MAX_WIDTH || bitmapHeight > CANVAS_MAX_HEIGHT) {
-            Toast.makeText(this, "画布宽高超过限制", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        int resizeWidth = getResizeWidth();
-        int resizeHeight = getResizeHeight();
-        if (bitmapWidth == 0 || bitmapHeight == 0) {
-            //表示没有传入固定的画布大小
-            hasSize = false;
-            bitmapWidth = resizeWidth;
-            bitmapHeight = resizeHeight;
-
-        } else {
-            hasSize = true;
-        }
 
         View mCancelView = findViewById(R.id.tv_cancel);
         View mOkView = findViewById(R.id.tv_ok);
 
         mContainerView = findViewById(R.id.sign_container);
         mPaintView = findViewById(R.id.paint_view);
+        mHandView = findViewById(R.id.btn_hand);
         mUndoView = findViewById(R.id.btn_undo);
         mRedoView = findViewById(R.id.btn_redo);
         mPenView = findViewById(R.id.btn_pen);
@@ -130,58 +104,61 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         mPenView.setOnClickListener(this);
         mClearView.setOnClickListener(this);
         mSettingView.setOnClickListener(this);
+        mHandView.setOnClickListener(this);
         mCancelView.setOnClickListener(this);
         mOkView.setOnClickListener(this);
 
         mPenView.setSelected(true);
         mUndoView.setEnabled(false);
         mRedoView.setEnabled(false);
+        mClearView.setEnabled(!mPaintView.isEmpty());
 
         mPaintView.setBackgroundColor(Color.WHITE);
         mPaintView.setStepCallback(this);
 
+        PenConfig.PAINT_SIZE_LEVEL = PenConfig.getPaintTextLevel(this);
+        PenConfig.PAINT_COLOR = PenConfig.getPaintColor(this);
+
         mSettingView.setPaintColor(PenConfig.PAINT_COLOR);
-        mSettingView.setCircleRadius(PenConfig.PAINT_SIZE);
+        mSettingView.setRadiusLevel(PenConfig.PAINT_SIZE_LEVEL);
 
-        if (!TextUtils.isEmpty(sealName) || showSealTime) {
-            mSealView.setVisibility(View.VISIBLE);
-            mSealView.setTextContent(sealName);
-            mSealView.showTime(showSealTime);
-            showSeal = true;
-        } else {
-            mSealView.setVisibility(View.GONE);
-            showSeal = false;
-        }
+        setThemeColor(PenConfig.THEME_COLOR);
+        mClearView.setImage(R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
+        mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
+        mRedoView.setImage(R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        mUndoView.setImage(R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        mClearView.setImage(R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        mSettingView.setOutBorderColor(PenConfig.THEME_COLOR);
+        mHandView.setImage(R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
 
-        if (bitmapWidth < resizeWidth) {
-            mSealView.setTextSize(getResources().getDimension(R.dimen.seal_small_text_size));
-            mSealView.setTimeTextSize(getResources().getDimension(R.dimen.seal_small_time_text_size));
-        }
-
-        //初始画板设置
-        mPaintView.init(this, bitmapWidth, bitmapHeight, mInitPath);
-        mSettingView.setPaintColor(PenConfig.PAINT_COLOR);
-        if (bgColor != Color.TRANSPARENT) {
-            mPaintView.setBackgroundColor(bgColor);
-        }
-        //显示隐藏拖拽按钮
-        hideShowDrag();
     }
 
+
+    /**
+     * 获取画布默认宽度
+     *
+     * @return
+     */
     private int getResizeWidth() {
+        int padding = DisplayUtil.dip2px(this, 40);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && dm.widthPixels < dm.heightPixels) {
-            return (int) (dm.heightPixels* widthRate);
+            return (int) ((dm.heightPixels - padding) * widthRate);
         }
-        return (int) (dm.widthPixels * widthRate);
+        return (int) ((dm.widthPixels - padding) * widthRate);
     }
 
+    /**
+     * 获取画布默认高度
+     *
+     * @return
+     */
     private int getResizeHeight() {
-        int toolBarHeight = getResources().getDimensionPixelSize(R.dimen.grid_toolbar_height);
+        int toolBarHeight = getResources().getDimensionPixelSize(R.dimen.sign_grid_toolbar_height);
         int actionbarHeight = getResources().getDimensionPixelSize(R.dimen.sign_actionbar_height);
         int statusBarHeight = StatusBarCompat.getStatusBarHeight(this);
-        int otherHeight = toolBarHeight + actionbarHeight + statusBarHeight;
+        int otherHeight = toolBarHeight + actionbarHeight + statusBarHeight + DisplayUtil.dip2px(this, 50);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -193,12 +170,71 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     protected void initData() {
-        setThemeColor(PenConfig.THEME_COLOR);
-        mClearView.setImage(R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
-        mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
-        mRedoView.setImage(R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mUndoView.setImage(R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mSettingView.setOutBorderColor(PenConfig.THEME_COLOR);
+        isCrop = getIntent().getBooleanExtra("crop", false);
+        String sealName = getIntent().getStringExtra("sealName");
+        format = getIntent().getStringExtra("format");
+        String sealLabel = getIntent().getStringExtra("sealLabel");
+        bgColor = getIntent().getIntExtra("background", Color.TRANSPARENT);
+        String mInitPath = getIntent().getStringExtra("image");
+        float bitmapWidth = getIntent().getFloatExtra("width", 1.0f);
+        float bitmapHeight = getIntent().getFloatExtra("height", 1.0f);
+
+        if (bitmapWidth > 0 && bitmapWidth <= 1.0f) {
+            widthRate = bitmapWidth;
+            mWidth = getResizeWidth();
+        } else {
+            hasSize = true;
+            mWidth = bitmapWidth;
+        }
+        if (bitmapHeight > 0 && bitmapHeight <= 1.0f) {
+            heightRate = bitmapHeight;
+            mHeight = getResizeHeight();
+        } else {
+            hasSize = true;
+            mHeight = bitmapHeight;
+        }
+        if (mWidth > CANVAS_MAX_WIDTH) {
+            Toast.makeText(getApplicationContext(), "画板宽度已超过" + CANVAS_MAX_WIDTH, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        if (mHeight > CANVAS_MAX_WIDTH) {
+            Toast.makeText(getApplicationContext(), "画板高度已超过" + CANVAS_MAX_WIDTH, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        if (!TextUtils.isEmpty(sealName) || !TextUtils.isEmpty(sealLabel)) {
+            mSealView.setVisibility(View.VISIBLE);
+            mSealView.setTextContent(sealName);
+            mSealView.setLabel(sealLabel);
+            showSeal = true;
+        } else {
+            mSealView.setVisibility(View.GONE);
+            showSeal = false;
+        }
+
+        if (mWidth < getResizeWidth()) {
+            mSealView.setTextSize(getResources().getDimension(R.dimen.seal_small_text_size));
+            mSealView.setTimeTextSize(getResources().getDimension(R.dimen.seal_small_time_text_size));
+        }
+        //初始画板设置
+        if (!hasSize && !TextUtils.isEmpty(mInitPath)) {
+            Bitmap bitmap = BitmapFactory.decodeFile(mInitPath);
+            mWidth = bitmap.getWidth();
+            mHeight = bitmap.getHeight();
+            hasSize = true;
+            if (mWidth > CANVAS_MAX_WIDTH || mHeight > CANVAS_MAX_HEIGHT) {
+                bitmap = BitmapUtil.zoomImg(bitmap, CANVAS_MAX_WIDTH, CANVAS_MAX_WIDTH);
+                mWidth = bitmap.getWidth();
+                mHeight = bitmap.getHeight();
+            }
+        }
+        mPaintView.init((int) mWidth, (int) mHeight, mInitPath);
+        if (bgColor != Color.TRANSPARENT) {
+            mPaintView.setBackgroundColor(bgColor);
+        }
+        //显示隐藏拖拽按钮
+        hideShowDrag();
     }
 
     /**
@@ -210,6 +246,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         if (settingWindow != null) {
             settingWindow.dismiss();
         }
+
         int resizeWidth = getResizeWidth();
         int resizeHeight = getResizeHeight();
         if (mPaintView != null && !hasSize) {
@@ -219,7 +256,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     }
 
     /**
-     * 控制拖动按钮是否显示
+     * 控制防误触按钮是否显示
      */
     private void hideShowDrag() {
         ViewTreeObserver vto2 = mContainerView.getViewTreeObserver();
@@ -227,13 +264,19 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             @Override
             public void onGlobalLayout() {
                 mContainerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                int limitWidth = mContainerView.getWidth();
-                int limitHeight = mContainerView.getHeight();
+                //显示操作指引
+                if (PenConfig.getFirst(PaintActivity.this)) {
+                    showGuideView();
+                    PenConfig.setFirst(PaintActivity.this, false);
+                }
+
+                int limitWidth = mContainerView.getWidth() - DisplayUtil.dip2px(PaintActivity.this, 20);
+                int limitHeight = mContainerView.getHeight() - DisplayUtil.dip2px(PaintActivity.this, 20);
                 if (mPaintView.getBitmap().getWidth() > limitWidth || mPaintView.getBitmap().getHeight() > limitHeight) {
-                    mPenView.setVisibility(View.VISIBLE);
+                    mHandView.setVisibility(View.VISIBLE);
                 } else {
-                    mPenView.setVisibility(View.GONE);
-                    mPaintView.setScroll(false);
+                    //根据是否平板来显示防误触按钮
+                    mHandView.setVisibility(SystemUtil.isTablet(PaintActivity.this) ? View.VISIBLE : View.GONE);
                 }
             }
         });
@@ -243,10 +286,18 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.btn_setting) {
-            showSettingWindow();
+            showPaintSettingWindow();
+
+        } else if (i == R.id.btn_hand) {
+            mPaintView.setFingerEnable(!mPaintView.isFingerEnable());
+            if (mPaintView.isFingerEnable()) {
+                mHandView.setImage(R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
+            } else {
+                mHandView.setImage(R.drawable.sign_ic_drag, PenConfig.THEME_COLOR);
+            }
 
         } else if (i == R.id.btn_clear) {
-            mPaintView.setPenType(PenConfig.TYPE_CLEAR);
+            mPaintView.reset();
 
         } else if (i == R.id.btn_undo) {
             mPaintView.undo();
@@ -255,20 +306,23 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             mPaintView.redo();
 
         } else if (i == R.id.btn_pen) {
-            mPaintView.setScroll(!mPaintView.isScroll());
-            if (!mPaintView.isScroll()) {
-                mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
+            if (!mPaintView.isEraser()) {
+                mPaintView.setPenType(PaintView.TYPE_ERASER);
+                mPenView.setImage(R.drawable.sign_ic_eraser, PenConfig.THEME_COLOR);
             } else {
-                mPenView.setImage(R.drawable.sign_ic_drag, PenConfig.THEME_COLOR);
+                mPaintView.setPenType(PaintView.TYPE_PEN);
+                mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
             }
-
         } else if (i == R.id.tv_ok) {
             save();
 
         } else if (i == R.id.tv_cancel) {
-            setResult(RESULT_CANCELED);
-            finish();
-
+            if (!mPaintView.isEmpty()) {
+                showQuitTip();
+            } else {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
         }
     }
 
@@ -287,19 +341,19 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     /**
      * 弹出画笔设置
      */
-    private void showSettingWindow() {
+    private void showPaintSettingWindow() {
         settingWindow = new PaintSettingWindow(this);
         settingWindow.setSettingListener(new PaintSettingWindow.OnSettingListener() {
             @Override
             public void onColorSetting(int color) {
-                mPaintView.setPaintColor(PenConfig.PAINT_COLOR);
-                mSettingView.setPaintColor(PenConfig.PAINT_COLOR);
+                mPaintView.setPaintColor(color);
+                mSettingView.setPaintColor(color);
             }
 
             @Override
-            public void onSizeSetting(int size) {
-                mSettingView.setCircleRadius(PenConfig.PAINT_SIZE);
-                mPaintView.setPaintWidth(PenConfig.PAINT_SIZE);
+            public void onSizeSetting(int index) {
+                mSettingView.setRadiusLevel(index);
+                mPaintView.setPaintWidth(PaintSettingWindow.PEN_SIZES[index]);
             }
         });
 
@@ -307,11 +361,13 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         //需要先测量，PopupWindow还未弹出时，宽高为0
         contentView.measure(SystemUtil.makeDropDownMeasureSpec(settingWindow.getWidth()),
                 SystemUtil.makeDropDownMeasureSpec(settingWindow.getHeight()));
+
         int padding = DisplayUtil.dip2px(this, 10);
-        settingWindow.getContentView().setBackgroundResource(R.drawable.bottom_right_pop_bg);
+        settingWindow.popAtBottomRight();
         settingWindow.showAsDropDown(mSettingView, mSettingView.getWidth() - settingWindow.getContentView().getMeasuredWidth() + 2 * padding, 10);
 
     }
+
 
     private void initSaveProgressDlg() {
         mSaveProgressDlg = new ProgressDialog(this);
@@ -326,7 +382,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             switch (msg.what) {
                 case MSG_SAVE_FAILED:
                     mSaveProgressDlg.dismiss();
-                    Toast.makeText(PaintActivity.this, "保存失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "保存失败", Toast.LENGTH_SHORT).show();
                     break;
                 case MSG_SAVE_SUCCESS:
                     mSaveProgressDlg.dismiss();
@@ -346,20 +402,19 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
      */
     private void save() {
         if (mPaintView.isEmpty()) {
-            Toast.makeText(this, "没有写入任何文字", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "没有写入任何文字", Toast.LENGTH_SHORT).show();
             return;
         }
         //先检查是否有存储权限
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101);
+            Toast.makeText(getApplicationContext(), "没有读写存储的权限", Toast.LENGTH_SHORT).show();
             return;
         }
         if (mSaveProgressDlg == null) {
             initSaveProgressDlg();
         }
         mSaveProgressDlg.show();
-        mSealView.setTimeStamp(System.currentTimeMillis());
         new Thread(() -> {
             try {
                 Bitmap result = mPaintView.buildAreaBitmap(isCrop);
@@ -372,7 +427,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
                 if (showSeal) {
                     Bitmap sealBitmap = mSealView.getBitmap();
                     if (sealBitmap != null) {
-                        result = BitmapUtil.addWaterMask(result, sealBitmap, bgColor);
+                        result = BitmapUtil.addWaterMask(result, sealBitmap, bgColor, hasSize);
                     }
                 }
                 if (result == null) {
@@ -396,27 +451,46 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     public void onOperateStatusChanged() {
         mUndoView.setEnabled(mPaintView.canUndo());
         mRedoView.setEnabled(mPaintView.canRedo());
+        mClearView.setEnabled(!mPaintView.isEmpty());
 
         mRedoView.setImage(R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
         mUndoView.setImage(R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        mClearView.setImage(R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+    }
+
+    /**
+     * 显示操作指引
+     */
+    private void showGuideView() {
+        View viewParent = getWindow().getDecorView();
+        if (viewParent == null)
+            return;
+        GuideView guideView = new GuideView(this, viewParent, mHandView, mPenView);
+        guideView.show();
     }
 
     @Override
     public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        finish();
+        if (!mPaintView.isEmpty()) {
+            showQuitTip();
+        } else {
+            setResult(RESULT_CANCELED);
+            finish();
+        }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 101:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {//获得了权限
-                    save();
-                } else {
-                    Toast.makeText(this, "禁止了读写存储权限", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
+    /**
+     * 弹出退出提示
+     */
+    private void showQuitTip() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示")
+                .setMessage("当前文字未保存，是否退出？")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                });
+        builder.show();
     }
 }

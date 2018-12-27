@@ -6,15 +6,24 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.king.signature.config.PenConfig;
-import android.king.signature.pen.BasePenExtend;
-import android.king.signature.pen.SteelPen;
-import android.king.signature.util.BitmapUtil;
-import android.king.signature.util.StepOperator;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.king.signature.util.DisplayUtil;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
+
+import android.king.signature.R;
+import android.king.signature.config.PenConfig;
+import android.king.signature.pen.BasePenExtend;
+import android.king.signature.pen.Eraser;
+import android.king.signature.pen.SteelPen;
+import android.king.signature.util.BitmapUtil;
+import android.king.signature.util.StepOperator;
+
 
 
 /**
@@ -24,29 +33,25 @@ import android.view.View;
  * @since 2018/5/4
  */
 public class PaintView extends View {
+
+    public static final int TYPE_PEN = 0;
+    public static final int TYPE_ERASER = 1;
+
     private Paint mPaint;
     private Canvas mCanvas;
     private Bitmap mBitmap;
-    private Context mContext;
+    private int strokeWidth;
     private BasePenExtend mStokeBrushPen;
 
+    private boolean isFingerEnable = true;
+    private boolean isEraser = false;
+
+    private EraserView eraserView;
     /**
      * 是否有绘制
      */
-    private boolean hasDraw;
+    private boolean hasDraw = false;
 
-    /**
-     * 是否滚动模式
-     */
-    private boolean isScroll = false;
-    /**
-     * 记录当前画笔类型
-     */
-    private int mPenType = PenConfig.TYPE_PEN;
-    /**
-     * 记录上次选择的画笔类型（方便在清除画布时切换回上一次画笔类型）
-     */
-    private int lastPenType = PenConfig.TYPE_PEN;
 
     /**
      * 画笔轨迹记录
@@ -55,15 +60,22 @@ public class PaintView extends View {
 
     private StepCallback mCallback;
 
-
     /**
-     * 可以撤销
+     * 是否可以撤销
      */
     private boolean mCanUndo;
+    /**
+     * 是否可以恢复
+     */
     private boolean mCanRedo;
 
     private int mWidth;
     private int mHeight;
+
+    private boolean isDrawing = false;//是否正在绘制
+    private int toolType = 0;  //记录手写笔类型：触控笔/手指
+
+    private Eraser eraser;
 
     public PaintView(Context context) {
         this(context, null);
@@ -75,6 +87,7 @@ public class PaintView extends View {
 
     public PaintView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
     }
 
     /**
@@ -84,8 +97,7 @@ public class PaintView extends View {
      * @param height 画板高度
      * @param path   初始图片路径
      */
-    public void init(Context context, int width, int height, String path) {
-        this.mContext = context;
+    public void init(int width, int height, String path) {
         this.mWidth = width;
         this.mHeight = height;
 
@@ -104,16 +116,21 @@ public class PaintView extends View {
         } else {
             mStepOperation.addBitmap(mBitmap);
         }
-
+        //橡皮擦
+        RelativeLayout parentView = (RelativeLayout) getParent().getParent().getParent();
+        eraserView = parentView.findViewById(R.id.eraser);
+        eraserView.setAlpha(0);//先让EraserView显示，但设置为透明，不然隐藏再显示会有闪屏现象
+        eraser = new Eraser(getResources().getDimensionPixelSize(R.dimen.sign_eraser_size), eraserView);
     }
 
     /**
      * 初始画笔设置
      */
     private void initPaint() {
+        strokeWidth = DisplayUtil.dip2px(getContext(), PaintSettingWindow.PEN_SIZES[PenConfig.PAINT_SIZE_LEVEL]);
         mPaint = new Paint();
         mPaint.setColor(PenConfig.PAINT_COLOR);
-        mPaint.setStrokeWidth(PenConfig.PAINT_SIZE);
+        mPaint.setStrokeWidth(strokeWidth);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setAlpha(0xFF);
         mPaint.setAntiAlias(true);
@@ -131,57 +148,61 @@ public class PaintView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawBitmap(mBitmap, 0, 0, mPaint);
-        switch (mPenType) {
-            case PenConfig.TYPE_PEN:
-                mStokeBrushPen.draw(canvas);
-                break;
-            case PenConfig.TYPE_CLEAR:
-                reset();
-                break;
-            default:
-                break;
+        if (!isEraser) {
+            mStokeBrushPen.draw(canvas);
         }
         super.onDraw(canvas);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        getParent().requestDisallowInterceptTouchEvent(!isScroll);
+        getParent().requestDisallowInterceptTouchEvent(true);
         return super.dispatchTouchEvent(ev);
     }
 
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (isScroll) {
+
+        toolType = event.getToolType(event.getActionIndex());
+        if (!isFingerEnable && toolType != MotionEvent.TOOL_TYPE_STYLUS) {
             return false;
         }
-        mCanUndo = true;
-        mStokeBrushPen.onTouchEvent(event, mCanvas);
+        if (isEraser) {
+            eraser.handleEraserEvent(event, mCanvas);
+        } else {
+            mStokeBrushPen.onTouchEvent(event, mCanvas);
+        }
+
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-
+                isDrawing = false;
                 break;
             case MotionEvent.ACTION_MOVE:
                 hasDraw = true;
-
+                mCanUndo = true;
+                isDrawing = true;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                isDrawing = false;
                 break;
             case MotionEvent.ACTION_UP:
+                if (mStepOperation != null && isDrawing) {
+                    mStepOperation.addBitmap(mBitmap);
+                }
+                mCanUndo = !mStepOperation.currentIsFirst();
+                mCanRedo = !mStepOperation.currentIsLast();
                 if (mCallback != null) {
                     mCallback.onOperateStatusChanged();
                 }
+                isDrawing = false;
                 break;
             default:
                 break;
         }
         invalidate();
-        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            if (mStepOperation != null && hasDraw) {
-                mStepOperation.addBitmap(mBitmap);
-            }
-        }
         return true;
     }
-
 
     /**
      * @return 判断是否有绘制内容在画布上
@@ -212,7 +233,7 @@ public class PaintView extends View {
             mCanUndo = false;
             hasDraw = false;
         }
-        if (!mStepOperation.currentIsLast() && !mStepOperation.currentIsFirst()) {
+        if (!mStepOperation.currentIsLast()) {
             mCanRedo = true;
         }
         if (mCallback != null) {
@@ -238,7 +259,7 @@ public class PaintView extends View {
         } else {
             mCanRedo = false;
         }
-        if (!mStepOperation.currentIsLast() && !mStepOperation.currentIsFirst()) {
+        if (!mStepOperation.currentIsFirst()) {
             mCanUndo = true;
         }
         if (mCallback != null) {
@@ -253,7 +274,12 @@ public class PaintView extends View {
         mBitmap.eraseColor(Color.TRANSPARENT);
         hasDraw = false;
         mStokeBrushPen.clear();
-        mPenType = lastPenType;
+        if (mStepOperation != null) {
+            mStepOperation.reset();
+            mStepOperation.addBitmap(mBitmap);
+        }
+        mCanRedo = false;
+        mCanUndo = false;
         if (mCallback != null) {
             mCallback.onOperateStatusChanged();
         }
@@ -273,7 +299,6 @@ public class PaintView extends View {
         }
     }
 
-
     public interface StepCallback {
         /**
          * 操作变更
@@ -288,16 +313,19 @@ public class PaintView extends View {
     /**
      * 设置画笔样式
      *
-     * @param penType 画笔类型
+     * @param penType
      */
     public void setPenType(int penType) {
-        mPenType = penType;
-        if (penType != PenConfig.TYPE_CLEAR) {
-            lastPenType = penType;
+        isEraser = false;
+        switch (penType) {
+            case TYPE_PEN:
+                mStokeBrushPen = new SteelPen();
+                break;
+            case TYPE_ERASER:
+                isEraser = true;
+                break;
         }
-        if (mPenType == PenConfig.TYPE_PEN) {
-            mStokeBrushPen = new SteelPen();
-        }
+        //设置
         if (mStokeBrushPen.isNullPaint()) {
             mStokeBrushPen.setPaint(mPaint);
         }
@@ -311,7 +339,8 @@ public class PaintView extends View {
      */
     public void setPaintWidth(int width) {
         if (mPaint != null) {
-            mPaint.setStrokeWidth(width);
+            mPaint.setStrokeWidth(DisplayUtil.dip2px(getContext(), width));
+//            eraser.setPaintWidth(DisplayUtil.dip2px(getContext(), width));
             mStokeBrushPen.setPaint(mPaint);
             invalidate();
         }
@@ -350,20 +379,24 @@ public class PaintView extends View {
         return result;
     }
 
+    public boolean isFingerEnable() {
+        return isFingerEnable;
+    }
+
+    public void setFingerEnable(boolean fingerEnable) {
+        isFingerEnable = fingerEnable;
+    }
+
+    public boolean isEraser() {
+        return isEraser;
+    }
+
     public boolean canUndo() {
         return mCanUndo;
     }
 
     public boolean canRedo() {
         return mCanRedo;
-    }
-
-    public void setScroll(boolean scroll) {
-        this.isScroll = scroll;
-    }
-
-    public boolean isScroll() {
-        return isScroll;
     }
 
     public Bitmap getBitmap() {
@@ -380,10 +413,8 @@ public class PaintView extends View {
     public void resize(Bitmap bitmap, int width, int height) {
 
         if (mBitmap != null) {
-            if (width >= height) {
+            if (width >= this.mWidth) {
                 height = width * mBitmap.getHeight() / mBitmap.getWidth();
-            } else {
-                width = height * mBitmap.getWidth() / mBitmap.getHeight();
             }
             this.mWidth = width;
             this.mHeight = height;
@@ -409,7 +440,7 @@ public class PaintView extends View {
             if (srcBitmap == null || srcBitmap.isRecycled()) {
                 return;
             }
-            srcBitmap = BitmapUtil.zoomImg(srcBitmap, newBitmap.getWidth(), newBitmap.getHeight());
+            srcBitmap = BitmapUtil.zoomImg(srcBitmap, newBitmap.getWidth());
             //缩放后如果还是超出新图宽高，继续缩放
             if (srcBitmap.getWidth() > newBitmap.getWidth() || srcBitmap.getHeight() > newBitmap.getHeight()) {
                 srcBitmap = BitmapUtil.zoomImage(srcBitmap, newBitmap.getWidth(), newBitmap.getHeight());

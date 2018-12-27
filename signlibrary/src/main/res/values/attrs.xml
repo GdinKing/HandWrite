@@ -4,7 +4,7 @@
     <declare-styleable name="CircleView">
         <attr name="penColor" format="color"/>
         <attr name="outBorderColor" format="color"/>
-        <attr name="radius" format="integer"/>
+        <attr name="sizeLevel" format="integer"/><!-- 画笔大小等级 -->
         <attr name="showBorder" format="boolean"/>
         <attr name="showOutBorder" format="boolean"/>
     </declare-styleable>

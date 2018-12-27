@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+
 import android.king.signature.config.PenConfig;
 
 import java.io.File;
@@ -295,24 +296,6 @@ public class BitmapUtil {
                 height, matrix, true);
     }
 
-    /**
-     * 等比例缩放bitmap
-     *
-     * @param bm    源图
-     * @param ratio 缩放比例
-     * @return 缩放后的bitmap
-     */
-    public static Bitmap zoomImg(Bitmap bm, float ratio) {
-        // 获得图片的宽高
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        // 取得想要缩放的matrix参数
-        Matrix matrix = new Matrix();
-        matrix.postScale(ratio, ratio);
-        // 得到新的图片
-        return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
-    }
-
 
     /**
      * 给图片右下角添加水印
@@ -320,9 +303,10 @@ public class BitmapUtil {
      * @param src       源图
      * @param watermark 水印图
      * @param bgColor   背景色
+     * @param fixed     源图是否固定大小，固定则在源图上绘制印章，不固定则动态改变图片大小
      * @return 添加水印后的图片
      */
-    public static Bitmap addWaterMask(Bitmap src, Bitmap watermark, int bgColor) {
+    public static Bitmap addWaterMask(Bitmap src, Bitmap watermark, int bgColor, boolean fixed) {
         int w = src.getWidth();
         int h = src.getHeight();
         //获取原始水印图片的宽、高
@@ -332,13 +316,20 @@ public class BitmapUtil {
         //合理控制水印大小
         Matrix matrix1 = new Matrix();
         float ratio;
-        if (w2 > w) {
-            ratio = (float) w / w2;
-        } else {
-            ratio = (float) w2 / w;
-        }
-        if (ratio < 0.7f) {
+
+        ratio = (float) w2 / w;
+        if (ratio > 1.0f && ratio <= 2.0f) {
             ratio = 0.7f;
+        } else if (ratio > 2.0f) {
+            ratio = 0.5f;
+        } else if (ratio <= 0.2f) {
+            ratio = 2.0f;
+        } else if (ratio < 0.3f) {
+            ratio = 1.5f;
+        } else if (ratio <= 0.4f) {
+            ratio = 1.2f;
+        } else if (ratio < 1.0f) {
+            ratio = 1.0f;
         }
         matrix1.postScale(ratio, ratio);
         watermark = Bitmap.createBitmap(watermark, 0, 0, w2, h2, matrix1, true);
@@ -346,10 +337,14 @@ public class BitmapUtil {
         //获取新的水印图片的宽、高
         w2 = watermark.getWidth();
         h2 = watermark.getHeight();
-        if (w < w2 + 20) {
-            w = w + w2;
+        if (!fixed) {
+            if (w < 1.5 * w2) {
+                w = w + w2;
+            }
+            if (h < 2 * h2) {
+                h = h + h2;
+            }
         }
-        h = h + h2 + 20;
         // 创建一个新的和SRC长度宽度一样的位图
         Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
         Canvas cv = new Canvas(result);

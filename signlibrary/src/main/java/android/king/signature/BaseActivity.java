@@ -1,13 +1,12 @@
-package android.king.signature.ui;
+package android.king.signature;
 
-import android.app.Activity;
-import android.content.res.Configuration;
-import android.king.signature.R;
-import android.king.signature.util.StatusBarCompat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+
+import android.king.signature.util.StatusBarCompat;
 
 
 
@@ -17,7 +16,7 @@ import android.widget.TextView;
  * @since 2018-06-25
  * @author king
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     protected View actionbar;
     protected TextView tvCancel;
@@ -32,7 +31,6 @@ public abstract class BaseActivity extends Activity {
         initData();
     }
 
-
     /**
      * 初始化标题栏
      */
@@ -41,6 +39,7 @@ public abstract class BaseActivity extends Activity {
         tvCancel = findViewById(R.id.tv_cancel);
         tvSave = findViewById(R.id.tv_ok);
     }
+
 
     /**
      * 获取布局
@@ -67,7 +66,7 @@ public abstract class BaseActivity extends Activity {
             if (actionbar != null) {
                 actionbar.setBackgroundColor(color);
             }
-            StatusBarCompat.setStatusColor(this, color);
+            StatusBarCompat.compat(this, color);
         } catch (Exception e) {
 
         }

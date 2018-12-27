@@ -5,14 +5,16 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.king.signature.util.DisplayUtil;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+
 import android.king.signature.R;
 import android.king.signature.config.PenConfig;
 import android.king.signature.pen.BasePenExtend;
 import android.king.signature.pen.SteelPen;
 import android.king.signature.util.BitmapUtil;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
 
 
 /**
@@ -31,10 +33,6 @@ public class GridPaintView extends View {
      * 是否有绘制
      */
     private boolean hasDraw;
-    /**
-     * 画笔大小
-     */
-    private int mStrokeWidth = PenConfig.PAINT_SIZE;
 
     /**
      * 画布宽度
@@ -56,15 +54,15 @@ public class GridPaintView extends View {
     public GridPaintView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        mWidth = (int) getResources().getDimension(R.dimen.grid_size);
-        mHeight = (int) getResources().getDimension(R.dimen.grid_size);
-        initParameter(context);
+        mWidth = (int) getResources().getDimension(R.dimen.sign_grid_size);
+        mHeight = (int) getResources().getDimension(R.dimen.sign_grid_size);
+        initParameter();
     }
 
-    private void initParameter(Context context) {
+    private void initParameter() {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
-        mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_4444);
+        mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
         mStokeBrushPen = new SteelPen();
 
         initPaint();
@@ -75,7 +73,7 @@ public class GridPaintView extends View {
     private void initPaint() {
         mPaint = new Paint();
         mPaint.setColor(PenConfig.PAINT_COLOR);
-        mPaint.setStrokeWidth(PenConfig.PAINT_SIZE);
+        mPaint.setStrokeWidth(DisplayUtil.dip2px(getContext(), PaintSettingWindow.PEN_SIZES[PenConfig.PAINT_SIZE_LEVEL]));
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setAlpha(0xFF);
         mPaint.setAntiAlias(true);
@@ -183,8 +181,7 @@ public class GridPaintView extends View {
      */
     public void setPaintWidth(int width) {
         if (mPaint != null) {
-            mStrokeWidth = width;
-            mPaint.setStrokeWidth(mStrokeWidth);
+            mPaint.setStrokeWidth(DisplayUtil.dip2px(getContext(), width));
             mStokeBrushPen.setPaint(mPaint);
             invalidate();
         }
@@ -216,7 +213,7 @@ public class GridPaintView extends View {
         }
         Bitmap result = BitmapUtil.zoomImg(mBitmap, zoomSize);
         if (clearBlank) {
-            result = BitmapUtil.clearLRBlank(result, 50, Color.TRANSPARENT);
+            result = BitmapUtil.clearLRBlank(result, 10, Color.TRANSPARENT);
         }
         return result;
     }

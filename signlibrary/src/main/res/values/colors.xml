@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="black">#000000</color>
-    <color name="white">#ffffff</color>
     <color name="sign_border_gray">#7e7d7c</color>
     <color name="sign_seal_red">#c2292c</color>
+    <color name="sign_pen_black">#101010</color>
     <color name="sign_pen_red">#ec041f</color>
     <color name="sign_pen_green">#0cba02</color>
     <color name="sign_pen_yellow">#f9d403</color>
     <color name="sign_pen_blue">#027de9</color>
     <color name="sign_toolbar_bg">#0c53ab</color>
     <color name="sign_bg">#f5f5f5</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+
+    <color name="white_half_translate">#7fffffff</color>
 </resources>

@@ -6,10 +6,15 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.king.signature.R;
+import android.king.signature.util.DisplayUtil;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import android.king.signature.R;
+import android.king.signature.config.PenConfig;
+
+
 
 /**
  * 自定义圆形View
@@ -23,9 +28,10 @@ public class CircleView extends View {
     private Paint backPaint;
     private Paint borderPaint;
     private Paint outBorderPaint;
-    private int paintColor = Color.parseColor(PaintSettingWindow.PEN_COLORS[0]);
+    private int paintColor;
     private int outBorderColor = Color.parseColor("#0c53ab");
     private int circleRadius;
+    private int radiusLevel;
     private boolean showBorder = false;
     private boolean showOutBorder = false;
 
@@ -41,27 +47,29 @@ public class CircleView extends View {
         super(context, attrs, defStyleAttr);
 
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CircleView);
-        paintColor = ta.getColor(R.styleable.CircleView_penColor, Color.parseColor(PaintSettingWindow.PEN_COLORS[0]));
+        paintColor = ta.getColor(R.styleable.CircleView_penColor, PenConfig.PAINT_COLOR);
         outBorderColor = ta.getColor(R.styleable.CircleView_penColor, Color.parseColor("#0c53ab"));
-        circleRadius = ta.getInteger(R.styleable.CircleView_radius, 30);
+        radiusLevel = ta.getInteger(R.styleable.CircleView_sizeLevel, 2);
+        circleRadius = DisplayUtil.dip2px(context, PaintSettingWindow.PEN_SIZES[radiusLevel]);
         showBorder = ta.getBoolean(R.styleable.CircleView_showBorder, false);
         showOutBorder = ta.getBoolean(R.styleable.CircleView_showOutBorder, false);
         ta.recycle();
         init();
     }
 
+
     private void init() {
 
         borderPaint = new Paint();
         borderPaint.setColor(paintColor);
-        borderPaint.setStrokeWidth(4);
+        borderPaint.setStrokeWidth(5);
         borderPaint.setAntiAlias(true);
         borderPaint.setStrokeJoin(Paint.Join.ROUND);
         borderPaint.setStyle(Paint.Style.STROKE);
 
         outBorderPaint = new Paint();
         outBorderPaint.setColor(outBorderColor);
-        outBorderPaint.setStrokeWidth(3);
+        outBorderPaint.setStrokeWidth(3.5f);
         outBorderPaint.setAntiAlias(true);
         outBorderPaint.setStrokeJoin(Paint.Join.ROUND);
         outBorderPaint.setStyle(Paint.Style.STROKE);
@@ -91,7 +99,7 @@ public class CircleView extends View {
         }
         //绘制外边框
         if (showOutBorder) {
-            canvas.drawCircle(getWidth() / 2, getHeight() / 2, getWidth() / 2 - 1.5f, outBorderPaint);
+            canvas.drawCircle(getWidth() / 2, getHeight() / 2, getWidth() / 2 - 2f, outBorderPaint);
         }
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, circleRadius / 2.5f, mPaint);
     }
@@ -120,10 +128,19 @@ public class CircleView extends View {
             case MeasureSpec.UNSPECIFIED:
                 float value;
                 if (attr == 0) {
-                    value = (circleRadius / 2.5f + 40) * 2;
+                    if(showOutBorder) {
+                        value = (circleRadius / 2.5f + 40) * 2;
+                    }else{
+                        value = (circleRadius / 2.5f + 25) * 2;
+                    }
                     newSize = (int) (getPaddingLeft() + value + getPaddingRight());
                 } else if (attr == 1) {
-                    value = (circleRadius / 2.5f + 20) * 2;
+                    if(showOutBorder) {
+                        value = (circleRadius / 2.5f + 40) * 2;
+                    }else{
+                        value = (circleRadius / 2.5f + 25) * 2;
+                    }
+//                    value = (circleRadius / 2.5f + 20) * 2;
                     // 控件的高度  + getPaddingTop() +  getPaddingBottom()
                     newSize = (int) (getPaddingTop() + value + getPaddingBottom());
 
@@ -142,8 +159,9 @@ public class CircleView extends View {
         invalidate();
     }
 
-    public void setCircleRadius(int circleRadius) {
-        this.circleRadius = circleRadius;
+    public void setRadiusLevel(int level) {
+        this.radiusLevel = level;
+        this.circleRadius = DisplayUtil.dip2px(getContext(), PaintSettingWindow.PEN_SIZES[level]);
         invalidate();
     }
 
@@ -162,7 +180,7 @@ public class CircleView extends View {
         return paintColor;
     }
 
-    public int getCircleRadius() {
-        return circleRadius;
+    public int getRadiusLevel() {
+        return radiusLevel;
     }
 }

@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("android.king.signature.handwritesign", appContext.getPackageName());
+        assertEquals("android.king.signaturesign", appContext.getPackageName());
     }
 }

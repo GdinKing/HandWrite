@@ -7,17 +7,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.king.signature.R;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import android.king.signature.R;
 
 /**
  * 印章
@@ -61,9 +57,7 @@ public class SealView extends View {
      */
     private int timePadding = 10;
 
-    private String timeStamp;
-
-    private boolean showTime = false;
+    private String sealLabel;
 
 
     public SealView(Context context) {
@@ -80,7 +74,7 @@ public class SealView extends View {
         borderWidth = ta.getDimension(R.styleable.SealView_borderWidth, 1.0f);
         textSize = ta.getDimension(R.styleable.SealView_sealTextSize, getResources().getDimension(R.dimen.seal_text_size));
         timeTextSize = ta.getDimension(R.styleable.SealView_timeTextSize, getResources().getDimension(R.dimen.seal_time_text_size));
-        sealColor = ta.getColor(R.styleable.SealView_sealColor, ContextCompat.getColor(context,R.color.sign_seal_red));
+        sealColor = ta.getColor(R.styleable.SealView_sealColor, ContextCompat.getColor(context, R.color.sign_seal_red));
         sealName = ta.getString(R.styleable.SealView_sealName);
         ta.recycle();
         init();
@@ -111,7 +105,6 @@ public class SealView extends View {
         textPaint.setStrokeJoin(Paint.Join.ROUND);
         timePaint.setStyle(Paint.Style.FILL);
         timePaint.setTextAlign(Paint.Align.CENTER);
-        timeStamp = formatTime(System.currentTimeMillis());
 
     }
 
@@ -119,8 +112,8 @@ public class SealView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         int sealTop = (int) (borderWidth + paddingTop);
-        int sealLeft = (int) (getSealWidth() - getTextWidth() - paddingLeft - paddingLeft - 2 * borderWidth);
-        int sealRight = (int) (sealLeft + getTextWidth() + paddingLeft + paddingRight + borderWidth);
+        int sealLeft = (int) (getSealWidth() - getTextWidth() - paddingLeft - paddingLeft - borderWidth);
+        int sealRight = (int) (sealLeft + getTextWidth() + paddingLeft + paddingRight);
         int sealBottom = (int) (getTextHeight() + paddingTop + paddingBottom + borderWidth);
 
         Rect sealRect = new Rect(sealLeft, sealTop, sealRight, sealBottom);
@@ -134,9 +127,9 @@ public class SealView extends View {
             canvas.drawRect(borderRect, borderPaint);
         }
         //绘制时间
-        if (showTime) {
+        if (!TextUtils.isEmpty(sealLabel)) {
             Rect timeRect = new Rect(0, borderRect.bottom, getWidth(), getHeight());
-            canvas.drawText(timeStamp, timeRect.centerX(), getHeight(), timePaint);
+            canvas.drawText(sealLabel, timeRect.centerX(), getHeight() - borderWidth, timePaint);
         }
     }
 
@@ -161,7 +154,7 @@ public class SealView extends View {
     public Bitmap getBitmap() {
         // 创建对应大小的bitmap
         Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-                Bitmap.Config.ARGB_4444);
+                Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         this.draw(canvas);
         return bitmap;
@@ -176,7 +169,7 @@ public class SealView extends View {
 
     private float getSealWidth() {
 
-        float timeWidth = timePaint.measureText(timeStamp);
+        float timeWidth = timePaint.measureText(sealLabel);
         float signWidth;
         if (TextUtils.isEmpty(sealName)) {
             signWidth = 0;
@@ -202,7 +195,7 @@ public class SealView extends View {
             textHeight = Math.abs((fontMetrics.descent - fontMetrics.ascent));
         }
 
-        if (showTime) {
+        if (!TextUtils.isEmpty(sealLabel)) {
             return timeHeight + textHeight + paddingTop + paddingBottom + timePadding + 2 * borderWidth;
         }
         return textHeight + paddingTop + paddingBottom + 2 * borderWidth;
@@ -269,24 +262,9 @@ public class SealView extends View {
         invalidate();
     }
 
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setLabel(String sealTime) {
+        this.sealLabel = sealTime;
         invalidate();
     }
 
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = formatTime(timeStamp);
-        invalidate();
-    }
-
-    public void showTime(boolean showTime) {
-        this.showTime = showTime;
-        invalidate();
-    }
-
-    public String formatTime(long times) {
-        Date date = new Date(times);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        return sdf.format(date);
-    }
 }

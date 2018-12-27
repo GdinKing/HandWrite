@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.king.signature.R;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -40,6 +39,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.ScrollView;
 
+import android.king.signature.R;
 
 import java.util.List;
 
@@ -55,8 +55,6 @@ import java.util.List;
  * 当canScrollV 设置为false的时候就是一个水平的的ScrollView
  * 代码修改于v4的25.0.0版本的NestedScrollView，参考了RecyclerView的双向滚动的事件，参考了FrameLayoutd的onMeasure和ScrollView的HorizontalScrollView的onMeasure
  * 支持滑动末尾，ViewPager的页面切换
- *
- * {https://github.com/LuckyJayce/HVScrollView}
  */
 public class HVScrollView extends ViewGroup implements NestedScrollingParent,
         NestedScrollingChild, ScrollingView {

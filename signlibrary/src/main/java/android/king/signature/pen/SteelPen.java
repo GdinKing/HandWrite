@@ -3,9 +3,11 @@ package android.king.signature.pen;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+
 import android.king.signature.config.ControllerPoint;
 import android.king.signature.config.MotionElement;
 import android.king.signature.config.PenConfig;
+
 
 /**
  * 钢笔
@@ -14,11 +16,6 @@ import android.king.signature.config.PenConfig;
  * @author king
  */
 public class SteelPen extends BasePenExtend {
-
-    @Override
-    public void onUp(MotionElement mElement, Canvas canvas) {
-        super.onUp(mElement, canvas);
-    }
 
     @Override
     protected void doPreDraw(Canvas canvas) {
@@ -31,7 +28,7 @@ public class SteelPen extends BasePenExtend {
 
     @Override
     protected void doMove(double curDis) {
-        int steps = 1 + (int) curDis / PenConfig.STEP_FACTOR;
+        int steps = 1 + (int) curDis / STEP_FACTOR;
         double step = 1.0 / steps;
         for (double t = 0; t < 1.0; t += step) {
             ControllerPoint point = mBezier.getPoint(t);

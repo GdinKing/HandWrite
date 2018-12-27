@@ -1,9 +1,13 @@
 package android.king.signature.util;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 /**
  * 撤销/恢复 操作工具类
@@ -25,25 +29,56 @@ public class StepOperator {
     /**
      * 允许缓存Bitmap的最大宽度限制，过大容易内存溢出
      */
-    private static final int MAX_CACHE_BITMAP_WIDTH = 720;
-
+    public static int MAX_CACHE_BITMAP_WIDTH = 1024;
+    /**
+     * 当前位置
+     */
     private int currentIndex;
 
-
-    public StepOperator() {
-        init();
-    }
+    private boolean isUndo = false;
 
     /**
-     * 初始化
+     * 最大缓存内存大小
      */
-    private void init() {
+    private int cacheMemory;
+
+    public StepOperator() {
         if (mBitmaps == null) {
             mBitmaps = new ArrayList<>();
         }
         currentIndex = -1;
+        int maxMemory = (int) Runtime.getRuntime().maxMemory();
+        cacheMemory = maxMemory / 3;
     }
 
+    /**
+     * 重置
+     */
+    public void reset() {
+        if (mBitmaps != null) {
+            for (Bitmap bitmap : mBitmaps) {
+                bitmap.recycle();
+            }
+            mBitmaps.clear();
+        }
+        currentIndex = -1;
+    }
+
+    /**
+     * 内存是否足够
+     *
+     * @return
+     */
+    private boolean isMemoryEnable() {
+        int bitmapCache = 0;
+        for (Bitmap bitmap : mBitmaps) {
+            bitmapCache += bitmap.getRowBytes() * bitmap.getHeight();
+        }
+        if (bitmapCache > cacheMemory) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 缓存绘制的Bitmap
@@ -55,13 +90,23 @@ public class StepOperator {
             return;
         }
         try {
-            if (bitmap.getWidth() > MAX_CACHE_BITMAP_WIDTH) {
-                bitmap = BitmapUtil.zoomImg(bitmap, MAX_CACHE_BITMAP_WIDTH);
-            } else {
-                bitmap = BitmapUtil.zoomImg(bitmap, 1.0f);
+            if (!isMemoryEnable() && mBitmaps.size() > 1) {
+                mBitmaps.get(1).recycle();
+                //删除第一笔（0的位置有空的占位图）
+                mBitmaps.remove(1);
             }
+            if (currentIndex != -1 && isUndo) {
+                for (int i = currentIndex + 1; i < mBitmaps.size(); i++) {
+                    mBitmaps.get(i).recycle();
+                }
+                mBitmaps = mBitmaps.subList(0, currentIndex + 1);
+                isUndo = false;
+            }
+
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), null, true);
             mBitmaps.add(bitmap);
             currentIndex = mBitmaps.size() - 1;
+
             if (mBitmaps.size() > CAPACITY) {
                 mBitmaps.get(1).recycle();
                 //删除第一笔（0的位置有空的占位图）
@@ -84,7 +129,6 @@ public class StepOperator {
         return false;
     }
 
-
     /**
      * 判断当前是否最后一步
      *
@@ -98,14 +142,6 @@ public class StepOperator {
     }
 
 
-    public void removeCurrent() {
-        if (mBitmaps == null || currentIndex >= mBitmaps.size()) {
-            return;
-        }
-        mBitmaps.remove(currentIndex);
-        currentIndex--;
-    }
-
     /**
      * 撤销
      */
@@ -113,7 +149,7 @@ public class StepOperator {
         if (mBitmaps == null) {
             return;
         }
-
+        isUndo = true;
         currentIndex--;
         if (currentIndex < 0) {
             currentIndex = 0;
@@ -123,7 +159,7 @@ public class StepOperator {
             if (bitmap.isRecycled()) {
                 return;
             }
-            bitmap = BitmapUtil.zoomImg(bitmap, srcBitmap.getWidth(), srcBitmap.getHeight());
+            bitmap = BitmapUtil.zoomImg(bitmap, srcBitmap.getWidth());
             if (bitmap.getWidth() > srcBitmap.getWidth() || bitmap.getHeight() > srcBitmap.getHeight()) {
                 bitmap = BitmapUtil.zoomImage(bitmap, srcBitmap.getWidth(), srcBitmap.getHeight());
             }
@@ -146,7 +182,6 @@ public class StepOperator {
         }
 
         currentIndex++;
-
         int lastIndex = mBitmaps.size() - 1;
         if (currentIndex >= lastIndex) {
             currentIndex = lastIndex;
@@ -156,7 +191,7 @@ public class StepOperator {
             if (bitmap.isRecycled()) {
                 return;
             }
-            bitmap = BitmapUtil.zoomImg(bitmap, srcBitmap.getWidth(), srcBitmap.getHeight());
+            bitmap = BitmapUtil.zoomImg(bitmap, srcBitmap.getWidth());
             if (bitmap.getWidth() > srcBitmap.getWidth() || bitmap.getHeight() > srcBitmap.getHeight()) {
                 bitmap = BitmapUtil.zoomImage(bitmap, srcBitmap.getWidth(), srcBitmap.getHeight());
             }

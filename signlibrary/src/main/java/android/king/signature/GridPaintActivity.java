@@ -1,4 +1,4 @@
-package android.king.signature.ui;
+package android.king.signature;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -9,42 +9,36 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.king.signature.R;
-import android.king.signature.config.PenConfig;
-import android.king.signature.util.BitmapUtil;
 import android.king.signature.util.DisplayUtil;
-import android.king.signature.util.SystemUtil;
-import android.king.signature.view.CircleView;
-import android.king.signature.view.CircleImageView;
-import android.king.signature.view.GridDrawable;
-import android.king.signature.view.GridPaintView;
-import android.king.signature.view.HVScrollView;
-import android.king.signature.view.NoSelectEditText;
-import android.king.signature.view.PaintSettingWindow;
-import android.king.signature.view.SealView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.DynamicDrawableSpan;
-import android.text.style.ImageSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import android.king.signature.config.PenConfig;
+import android.king.signature.util.BitmapUtil;
+import android.king.signature.util.SystemUtil;
+import android.king.signature.view.CircleImageView;
+import android.king.signature.view.CircleView;
+import android.king.signature.view.GridDrawable;
+import android.king.signature.view.GridPaintView;
+import android.king.signature.view.HVScrollView;
+import android.king.signature.view.HandWriteEditView;
+import android.king.signature.view.PaintSettingWindow;
+import android.king.signature.view.SealView;
+
 
 /***
- * 田字格输入界面
- *
+ * 名称：GridWriteActivity<br>
+ * 描述：米格输入界面
+ * 最近修改时间：
  * @since 2017/11/14
  * @author king
  */
@@ -52,7 +46,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
 
     private View mCircleContainer;
     private HVScrollView mTextContainer;
-    private NoSelectEditText mEditView;
+    private HandWriteEditView mEditView;
     private CircleImageView mDeleteView;
     private CircleImageView mSpaceView;
     private CircleImageView mClearView;
@@ -72,22 +66,27 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
     private int bgColor;
     private boolean isCrop;
     private boolean showSeal;
-    private boolean showSealTime;
+    private String sealLabel;
     private String sealName;
     private String format;
+    private int lineSize;
     private int fontSize;
+
+
+    private PaintSettingWindow settingWindow;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         bgColor = getIntent().getIntExtra("background", Color.TRANSPARENT);
-        fontSize = getIntent().getIntExtra("fontSize", 20);
+        lineSize = getIntent().getIntExtra("lineLength", 15);
+        fontSize = getIntent().getIntExtra("fontSize", 50);
         isCrop = getIntent().getBooleanExtra("crop", false);
         sealName = getIntent().getStringExtra("sealName");
         format = getIntent().getStringExtra("format");
-        showSealTime = getIntent().getBooleanExtra("showSealTime", false);
+        sealLabel = getIntent().getStringExtra("sealLabel");
 
         PenConfig.PAINT_COLOR = PenConfig.getPaintColor(this);
-        PenConfig.PAINT_SIZE = PenConfig.getPaintSize(this);
+        PenConfig.PAINT_SIZE_LEVEL = PenConfig.getPaintTextLevel(this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         super.onCreate(savedInstanceState);
         SystemUtil.disableShowInput(getApplicationContext(), mEditView);
@@ -113,6 +112,9 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
             mEditView.requestFocus();
         }
         mHandler = new Handler(this);
+        if (settingWindow != null) {
+            settingWindow.dismiss();
+        }
     }
 
     @Override
@@ -124,7 +126,9 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
     protected void initData() {
         setThemeColor(PenConfig.THEME_COLOR);
         mPenCircleView.setOutBorderColor(PenConfig.THEME_COLOR);
-        mClearView.setImage(R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
+
+        mClearView.setEnabled(false);
+        mClearView.setImage(R.drawable.sign_ic_clear, Color.LTGRAY);
         mEnterView.setImage(R.drawable.sign_ic_enter, PenConfig.THEME_COLOR);
         mSpaceView.setImage(R.drawable.sign_ic_space, PenConfig.THEME_COLOR);
         mDeleteView.setImage(R.drawable.sign_ic_delete, PenConfig.THEME_COLOR);
@@ -155,9 +159,9 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         mClearView.setOnClickListener(this);
         tvSave.setOnClickListener(this);
         mPenCircleView.setPaintColor(PenConfig.PAINT_COLOR);
-        mPenCircleView.setCircleRadius(PenConfig.PAINT_SIZE);
+        mPenCircleView.setRadiusLevel(PenConfig.PAINT_SIZE_LEVEL);
 
-        int size = getResources().getDimensionPixelSize(R.dimen.grid_size);
+        int size = getResources().getDimensionPixelSize(R.dimen.sign_grid_size);
         GridDrawable gridDrawable = new GridDrawable(size, size, Color.WHITE);
         mPaintView.setBackground(gridDrawable);
 
@@ -176,21 +180,39 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         mSealView.setTextSize(getResources().getDimension(R.dimen.seal_small_text_size));
         mSealView.setTimeTextSize(getResources().getDimension(R.dimen.seal_small_time_text_size));
 
-        mSealView.showTime(showSealTime);
-        if (!TextUtils.isEmpty(sealName) || showSealTime) {
+        if (!TextUtils.isEmpty(sealName) || !TextUtils.isEmpty(sealLabel)) {
             mSealView.setVisibility(View.VISIBLE);
             mSealView.setTextContent(sealName);
+            mSealView.setLabel(sealLabel);
             showSeal = true;
         } else {
             mSealView.setVisibility(View.GONE);
             showSeal = false;
         }
-        mEditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+        int maxWidth = lineSize * DisplayUtil.dip2px(this, fontSize);
+        if (!isCrop) {
+            mEditView.setWidth(maxWidth + 2);
+            mEditView.setMaxWidth(maxWidth);
+        } else {
+            mEditView.setWidth(maxWidth * 2 / 3);
+            mEditView.setMaxWidth(maxWidth * 2 / 3);
+        }
+        mEditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize * 3 / 4);
+        mEditView.setLineHeight(DisplayUtil.dip2px(this, fontSize));
         mEditView.setHorizontallyScrolling(false);
         mEditView.requestFocus();
         if (bgColor != Color.TRANSPARENT) {
             mTextContainer.setBackgroundColor(bgColor);
         }
+        mEditView.addTextWatcher(s -> {
+            if (s != null && s.length() > 0) {
+                mClearView.setEnabled(true);
+                mClearView.setImage(R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
+            } else {
+                mClearView.setEnabled(false);
+                mClearView.setImage(R.drawable.sign_ic_clear, Color.LTGRAY);
+            }
+        });
     }
 
     @Override
@@ -219,7 +241,8 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
      */
     private void showClearTips() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("清空文本框内手写内容？")
+        builder.setTitle("提示")
+                .setMessage("清空文本框内手写内容？")
                 .setNegativeButton("取消", null)
                 .setPositiveButton("确定", (dialog, which) -> {
                     mEditView.setText("");
@@ -236,7 +259,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
                 if (mSaveProgressDlg != null) {
                     mSaveProgressDlg.dismiss();
                 }
-                Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "保存失败", Toast.LENGTH_SHORT).show();
                 break;
             case MSG_SAVE_SUCCESS:
                 if (mSaveProgressDlg != null) {
@@ -249,8 +272,8 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
                 break;
             case MSG_WRITE_OK:
                 if (!mPaintView.isEmpty()) {
-                    Bitmap bitmap = mPaintView.buildBitmap(isCrop, DisplayUtil.sp2px(GridPaintActivity.this, fontSize + 4));
-                    addBitmapToText(bitmap);
+                    Bitmap bitmap = mPaintView.buildBitmap(isCrop, DisplayUtil.dip2px(GridPaintActivity.this, fontSize));
+                    this.cacheEditable = mEditView.addBitmapToText(bitmap);
                     mPaintView.reset();
                 }
                 break;
@@ -265,14 +288,14 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
      * 保存
      */
     private void save() {
-        if (mEditView.getText() == null) {
-            Toast.makeText(this, "没有写入任何文字", Toast.LENGTH_SHORT).show();
+        if (mEditView.getText() == null || mEditView.getText().length() == 0) {
+            Toast.makeText(getApplicationContext(), "没有写入任何文字", Toast.LENGTH_SHORT).show();
             return;
         }
         //先检查是否有存储权限
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101);
+            Toast.makeText(getApplicationContext(), "没有读写存储的权限", Toast.LENGTH_SHORT).show();
             return;
         }
         if (mSaveProgressDlg == null) {
@@ -281,17 +304,17 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         mEditView.clearFocus();
         mEditView.setCursorVisible(false);
 
-        mSealView.setTimeStamp(System.currentTimeMillis());
         mSaveProgressDlg.show();
         new Thread(() -> {
             if (PenConfig.FORMAT_JPG.equals(format) && bgColor == Color.TRANSPARENT) {
                 bgColor = Color.WHITE;
             }
             Bitmap bm = getWriteBitmap(bgColor);
+            bm = BitmapUtil.clearBlank(bm, 20, bgColor);
             if (showSeal) {
                 Bitmap sealBitmap = mSealView.getBitmap();
                 if (sealBitmap != null) {
-                    bm = BitmapUtil.addWaterMask(bm, sealBitmap, bgColor);
+                    bm = BitmapUtil.addWaterMask(bm, sealBitmap, bgColor, false);
                 }
             }
             if (bm == null) {
@@ -340,16 +363,21 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.delete) {
-            deleteBitmapFromText();
+            this.cacheEditable = mEditView.deleteBitmapFromText();
         } else if (i == R.id.tv_cancel) {
-            setResult(RESULT_CANCELED);
-            finish();
+            if (mEditView.getText() != null && mEditView.getText().length() > 0) {
+                showQuitTip();
+            } else {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
         } else if (i == R.id.tv_ok) {
             save();
         } else if (i == R.id.enter) {
-            addEnter();
+            Editable editable = mEditView.getText();
+            editable.insert(mEditView.getSelectionStart(), "\n");
         } else if (i == R.id.space) {
-            addSpace();
+            mEditView.addSpace(fontSize);
         } else if (i == R.id.clear) {
             showClearTips();
         } else if (i == R.id.pen_color) {
@@ -357,43 +385,24 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * 换行
-     */
-    private void addEnter() {
-        Editable editable = mEditView.getText();
-        editable.insert(mEditView.getSelectionStart(), "\n");
-    }
-
-    /**
-     * 添加空格
-     */
-    private void addSpace() {
-        int size = DisplayUtil.sp2px(this, fontSize + 4);
-        ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
-        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_4444);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.draw(canvas);
-        addBitmapToText(bitmap);
-    }
 
     /**
      * 弹出画笔设置
      */
     private void showSettingWindow() {
-        PaintSettingWindow settingWindow = new PaintSettingWindow(this);
+        settingWindow = new PaintSettingWindow(this);
 
         settingWindow.setSettingListener(new PaintSettingWindow.OnSettingListener() {
             @Override
             public void onColorSetting(int color) {
-                mPaintView.setPaintColor(PenConfig.PAINT_COLOR);
+                mPaintView.setPaintColor(color);
                 mPenCircleView.setPaintColor(PenConfig.PAINT_COLOR);
             }
 
             @Override
-            public void onSizeSetting(int size) {
-                mPaintView.setPaintWidth(PenConfig.PAINT_SIZE);
-                mPenCircleView.setCircleRadius(PenConfig.PAINT_SIZE);
+            public void onSizeSetting(int level) {
+                mPaintView.setPaintWidth(PaintSettingWindow.PEN_SIZES[level]);
+                mPenCircleView.setRadiusLevel(level);
             }
         });
 
@@ -409,82 +418,49 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
 
         Configuration config = getResources().getConfiguration();
         int smallestScreenWidth = config.smallestScreenWidthDp;
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && smallestScreenWidth == 800) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && smallestScreenWidth >= 720) {
             //平板上横屏显示
-            settingWindow.getContentView().setBackgroundResource(R.drawable.bottom_right_pop_bg);
+            settingWindow.popAtBottomRight();
             settingWindow.showAsDropDown(mCircleContainer, mCircleContainer.getWidth() - settingWindow.getContentView().getMeasuredWidth() - padding, 10);
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             //横屏显示
             offsetX = -settingWindow.getContentView().getMeasuredWidth() - padding;
             offsetY = -settingWindow.getContentView().getMeasuredHeight() - mCircleContainer.getHeight() / 2 + padding;
-            settingWindow.getContentView().setBackgroundResource(R.drawable.right_pop_bg);
+            settingWindow.popAtLeft();
             settingWindow.showAsDropDown(mCircleContainer, offsetX, offsetY);
         } else {
             //竖屏显示
             offsetX = 0;
-            offsetY = -(settingWindow.getContentView().getMeasuredHeight() + mPenCircleView.getHeight() + 2 * padding);
-            settingWindow.getContentView().setBackgroundResource(R.drawable.top_left_pop_bg);
+            offsetY = -(settingWindow.getContentView().getMeasuredHeight() + mPenCircleView.getHeight() + 4 * padding);
+            settingWindow.popAtTopLeft();
             settingWindow.showAsDropDown(mPenCircleView, offsetX, offsetY);
         }
     }
 
     @Override
     public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        finish();
+        if (mEditView.getText() != null && mEditView.getText().length() > 0) {
+            showQuitTip();
+        } else {
+            setResult(RESULT_CANCELED);
+            finish();
+        }
     }
-
 
     /**
-     * 添加手写文字
-     *
-     * @param srcBitmap 源图
+     * 弹出退出提示
      */
-    private void addBitmapToText(Bitmap srcBitmap) {
-        if (srcBitmap == null || mEditView == null) {
-            return;
-        }
-        SpannableString mSpan = new SpannableString("1");
-        mSpan.setSpan(new ImageSpan(this, srcBitmap, DynamicDrawableSpan.ALIGN_BOTTOM), mSpan.length() - 1, mSpan.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        Editable editable = mEditView.getText();
-        //获取光标所在位置
-        int index = mEditView.getSelectionStart();
-        editable.insert(index, mSpan);
-        mEditView.setText(editable);
-        mEditView.setSelection(index + mSpan.length());
-        this.cacheEditable = editable;
-
+    private void showQuitTip() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示")
+                .setMessage("当前文字未保存，是否退出？")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                });
+        builder.show();
     }
 
 
-    /**
-     * 删除文字
-     */
-    private void deleteBitmapFromText() {
-
-        if (mEditView == null) {
-            return;
-        }
-        Editable editable = mEditView.getEditableText();
-        int start = mEditView.getSelectionStart();
-        if (start == 0) {
-            return;
-        }
-        editable.delete(start - 1, start);
-        this.cacheEditable = editable;
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 101:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {//获得了权限
-                    save();
-                } else {
-                    Toast.makeText(this, "禁止了读写存储权限", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-    }
 }

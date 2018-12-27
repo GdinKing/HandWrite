@@ -1,6 +1,5 @@
 package android.king.signature.util;
 
-
 import android.king.signature.config.ControllerPoint;
 
 /**

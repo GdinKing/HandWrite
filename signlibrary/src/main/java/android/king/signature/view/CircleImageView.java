@@ -1,18 +1,3 @@
-/*
- * Copyright 2014 - 2018 Henning Dodenhof
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package android.king.signature.view;
 
 import android.content.Context;
@@ -32,8 +17,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.king.signature.R;
-import android.king.signature.util.BitmapUtil;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.ColorInt;
@@ -46,12 +29,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+import android.king.signature.R;
+import android.king.signature.util.BitmapUtil;
 
-/**
- * 圆形ImageView
- *
- * @author https://github.com/hdodenhof/CircleImageView
- */
 public class CircleImageView extends AppCompatImageView {
 
     private static final ScaleType SCALE_TYPE = ScaleType.CENTER_CROP;
@@ -59,7 +39,7 @@ public class CircleImageView extends AppCompatImageView {
     private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_4444;
     private static final int COLORDRAWABLE_DIMENSION = 2;
 
-    private static final int DEFAULT_BORDER_WIDTH = 3;
+    private static final int DEFAULT_BORDER_WIDTH = 0;
     private static final int DEFAULT_BORDER_COLOR = Color.parseColor("#0c53ab");
     private static final int DEFAULT_CIRCLE_BACKGROUND_COLOR = Color.WHITE;
     private static final boolean DEFAULT_BORDER_OVERLAY = false;
@@ -480,6 +460,7 @@ public class CircleImageView extends AppCompatImageView {
     private boolean inTouchableArea(float x, float y) {
         return Math.pow(x - mBorderRect.centerX(), 2) + Math.pow(y - mBorderRect.centerY(), 2) <= Math.pow(mBorderRadius, 2);
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private class OutlineProvider extends ViewOutlineProvider {

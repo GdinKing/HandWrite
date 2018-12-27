@@ -2,12 +2,12 @@ package android.king.signature.pen;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.MotionEvent;
+
+import android.king.signature.util.Bezier;
 import android.king.signature.config.ControllerPoint;
 import android.king.signature.config.MotionElement;
 import android.king.signature.config.PenConfig;
-import android.king.signature.util.Bezier;
-import android.view.MotionEvent;
-
 
 import java.util.ArrayList;
 
@@ -18,9 +18,13 @@ import java.util.ArrayList;
  * @since 2018/06/15
  */
 public abstract class BasePenExtend {
+    /**
+     * 绘制计算的次数，数值越小计算的次数越多
+     */
+    public static final int STEP_FACTOR = 20;
 
     protected ArrayList<ControllerPoint> mHWPointList = new ArrayList<>();
-    protected ArrayList<ControllerPoint> mPointList = new ArrayList<ControllerPoint>();
+    protected ArrayList<ControllerPoint> mPointList = new ArrayList<>();
     protected ControllerPoint mLastPoint = new ControllerPoint(0, 0);
     protected Paint mPaint;
 
@@ -51,19 +55,34 @@ public abstract class BasePenExtend {
         doPreDraw(canvas);
     }
 
+    private int lastId = 0;//记录最先/最后的手指id
 
     public boolean onTouchEvent(MotionEvent event, Canvas canvas) {
         // event会被下一次事件重用，这里必须生成新的，否则会有问题
         int action = event.getAction() & event.getActionMasked();
         MotionEvent event2 = MotionEvent.obtain(event);
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                lastId = event2.getPointerId(0);
                 onDown(createMotionElement(event2), canvas);
                 return true;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                lastId = 0;
+                mLastVel = 0;
+                mLastPoint = new ControllerPoint(event2.getX(event2.getActionIndex()), event2.getY(event2.getActionIndex()));
+                break;
             case MotionEvent.ACTION_MOVE:
+                if (lastId != event2.getPointerId(event2.getActionIndex())) {
+                    return true;
+                }
                 onMove(createMotionElement(event2), canvas);
                 return true;
+            case MotionEvent.ACTION_POINTER_UP:
+                onUp(createMotionElement(event2), canvas);
+                return true;
             case MotionEvent.ACTION_UP:
+                lastId = event2.getPointerId(0);
                 onUp(createMotionElement(event2), canvas);
                 return true;
             default:
@@ -88,13 +107,7 @@ public abstract class BasePenExtend {
         mHWPointList.clear();
         //记录down的控制点的信息
         ControllerPoint curPoint = new ControllerPoint(mElement.x, mElement.y);
-        //如果用笔画的画我的屏幕，记录他宽度的和压力值的乘
-        if (mElement.toolType == MotionEvent.TOOL_TYPE_STYLUS) {
-            mLastWidth = mElement.pressure * mBaseWidth;
-        } else {
-            //如果是手指画的，我们取他的0.8
-            mLastWidth = 0.8 * mBaseWidth;
-        }
+        mLastWidth = 0.7 * mBaseWidth;
         //down下的点的宽度
         curPoint.width = (float) mLastWidth;
         mLastVel = 0;
@@ -109,10 +122,8 @@ public abstract class BasePenExtend {
 
     /**
      * 手指移动的事件
-     *
      */
     public void onMove(MotionElement mElement, Canvas canvas) {
-
         ControllerPoint curPoint = new ControllerPoint(mElement.x, mElement.y);
         double deltaX = curPoint.x - mLastPoint.x;
         double deltaY = curPoint.y - mLastPoint.y;
@@ -124,22 +135,15 @@ public abstract class BasePenExtend {
         double curWidth;
         //点的集合少，我们得必须改变宽度,每次点击的down的时候，这个事件
         if (mPointList.size() < 2) {
-            if (mElement.toolType == MotionEvent.TOOL_TYPE_STYLUS) {
-                curWidth = mElement.pressure * mBaseWidth;
-            } else {
-                curWidth = calcNewWidth(curVel, mLastVel, curDis, 1.5,
-                        mLastWidth);
-            }
+
+            curWidth = calcNewWidth(curVel, mLastVel, curDis, 1.7,
+                    mLastWidth);
             curPoint.width = (float) curWidth;
             mBezier.init(mLastPoint, curPoint);
         } else {
             mLastVel = curVel;
-            if (mElement.toolType == MotionEvent.TOOL_TYPE_STYLUS) {
-                curWidth = mElement.pressure * mBaseWidth;
-            } else {
-                curWidth = calcNewWidth(curVel, mLastVel, curDis, 1.5,
-                        mLastWidth);
-            }
+            curWidth = calcNewWidth(curVel, mLastVel, curDis, 1.7,
+                    mLastWidth);
             curPoint.width = (float) curWidth;
             mBezier.addNode(curPoint);
         }
@@ -154,22 +158,19 @@ public abstract class BasePenExtend {
      * 手指抬起来的事件
      */
     public void onUp(MotionElement mElement, Canvas canvas) {
-
+        if (mPointList.size() == 0) {
+            return;
+        }
         mCurPoint = new ControllerPoint(mElement.x, mElement.y);
         double deltaX = mCurPoint.x - mLastPoint.x;
         double deltaY = mCurPoint.y - mLastPoint.y;
         double curDis = Math.hypot(deltaX, deltaY);
-        if (mElement.toolType == MotionEvent.TOOL_TYPE_STYLUS) {
-            mCurPoint.width = (float) (mElement.pressure * mBaseWidth);
-        } else {
-            mCurPoint.width = 0;
-        }
-
+        mCurPoint.width = 0;
         mPointList.add(mCurPoint);
 
         mBezier.addNode(mCurPoint);
 
-        int steps = 1 + (int) curDis / PenConfig.STEP_FACTOR;
+        int steps = 1 + (int) curDis / STEP_FACTOR;
         double step = 1.0 / steps;
         for (double t = 0; t < 1.0; t += step) {
             ControllerPoint point = mBezier.getPoint(t);
@@ -199,7 +200,7 @@ public abstract class BasePenExtend {
      * 创建触摸点信息
      */
     public MotionElement createMotionElement(MotionEvent motionEvent) {
-        MotionElement motionElement = new MotionElement(motionEvent.getX(), motionEvent.getY(),
+        MotionElement motionElement = new MotionElement(motionEvent.getX(0), motionEvent.getY(0),
                 motionEvent.getPressure(), motionEvent.getToolType(0));
         return motionElement;
     }
@@ -220,7 +221,6 @@ public abstract class BasePenExtend {
         if ((mCurPoint.x == point.x) && (mCurPoint.y == point.y)) {
             return;
         }
-        //水彩笔的效果和钢笔的不太一样，交给自己去实现
         doDraw(canvas, point, paint);
     }
 

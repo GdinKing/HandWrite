@@ -1,58 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:id="@+id/setting_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingLeft="10dp"
     android:paddingRight="10dp">
 
     <LinearLayout
         android:id="@+id/size_container"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <android.king.signature.view.CircleView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="6dp"
             android:layout_weight="1"
-            app:penColor="@color/black"
-            app:radius="20" />
+            app:sizeLevel="0"
+            app:penColor="@color/black" />
 
         <android.king.signature.view.CircleView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="6dp"
             android:layout_weight="1"
-            app:penColor="@color/black"
-            app:radius="40" />
+            app:sizeLevel="1"
+            app:penColor="@color/black" />
 
         <android.king.signature.view.CircleView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="6dp"
             android:layout_weight="1"
-            app:penColor="@color/black"
-            app:radius="50" />
+            app:sizeLevel="2"
+            app:penColor="@color/black" />
 
         <android.king.signature.view.CircleView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="6dp"
             android:layout_weight="1"
-            app:penColor="@color/black"
-            app:radius="60" />
+            app:sizeLevel="3"
+            app:penColor="@color/black" />
 
         <android.king.signature.view.CircleView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:penColor="@color/black"
-            app:radius="70" />
+            app:sizeLevel="4"
+            app:penColor="@color/black" />
 
     </LinearLayout>
 
@@ -69,45 +70,49 @@
         android:id="@+id/color_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginBottom="10dp"
-        android:gravity="right"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <android.king.signature.view.CircleView
             android:id="@+id/cv_black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:penColor="@color/black"
-            app:radius="60" />
+            android:layout_weight="1"
+            app:sizeLevel="4"
+            app:penColor="@color/sign_pen_black" />
 
         <android.king.signature.view.CircleView
             android:id="@+id/cv_blue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:penColor="@color/sign_pen_blue"
-            app:radius="60" />
+            android:layout_weight="1"
+            app:sizeLevel="4"
+            app:penColor="@color/sign_pen_blue" />
 
         <android.king.signature.view.CircleView
             android:id="@+id/cv_green"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:penColor="@color/sign_pen_green"
-            app:radius="60" />
+            android:layout_weight="1"
+            app:sizeLevel="4"
+            app:penColor="@color/sign_pen_green" />
 
         <android.king.signature.view.CircleView
             android:id="@+id/cv_yellow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:penColor="@color/sign_pen_yellow"
-            app:radius="60" />
+            android:layout_weight="1"
+            app:sizeLevel="4"
+            app:penColor="@color/sign_pen_yellow" />
 
         <android.king.signature.view.CircleView
             android:id="@+id/cv_red"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:penColor="@color/sign_pen_red"
-            app:radius="60" />
+            android:layout_weight="1"
+            app:sizeLevel="4"
+            app:penColor="@color/sign_pen_red" />
 
 
     </LinearLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="sign_guide" type="id"></item>
+    <item name="sign_guide_hand" type="id"></item>
+    <item name="sign_guide_hand_text" type="id"></item>
+    <item name="sign_guide_hand_img" type="id"></item>
+    <item name="sign_guide_pen" type="id"></item>
+    <item name="sign_guide_pen_text" type="id"></item>
+    <item name="sign_guide_pen_img" type="id"></item>
+</resources>
