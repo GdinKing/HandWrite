@@ -140,7 +140,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
      * @return
      */
     private int getResizeWidth() {
-        int padding = DisplayUtil.dip2px(this, 40);
+        int padding = DisplayUtil.dip2px(this, 20);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && dm.widthPixels < dm.heightPixels) {

@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:clipToPadding="true"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <include
@@ -21,41 +21,36 @@
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:background="@drawable/sign_bg_shape"
             android:padding="10dp">
 
-            <RelativeLayout
+
+            <android.king.signature.view.HVScrollView
+                android:id="@+id/sv_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white">
+                android:fadingEdge="none">
 
-                <android.king.signature.view.HVScrollView
-                    android:id="@+id/sv_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fadingEdge="none">
-
-                    <android.king.signature.view.HandWriteEditView
-                        android:id="@+id/et_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@null" />
-                </android.king.signature.view.HVScrollView>
-
-                <android.king.signature.view.SealView
-                    android:id="@+id/seal_view"
+                <android.king.signature.view.HandWriteEditView
+                    android:id="@+id/et_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginRight="5dp"
-                    app:borderWidth="2dp" />
-            </RelativeLayout>
+                    android:background="@null" />
+            </android.king.signature.view.HVScrollView>
+
+            <android.king.signature.view.SealView
+                android:id="@+id/seal_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                app:borderWidth="2dp" />
         </RelativeLayout>
 
         <LinearLayout
@@ -115,8 +110,8 @@
                         android:layout_width="@dimen/sign_tool_icon_size"
                         android:layout_height="@dimen/sign_tool_icon_size"
                         android:layout_centerInParent="true"
-                        app:sizeLevel="2"
-                        app:showOutBorder="true" />
+                        app:showOutBorder="true"
+                        app:sizeLevel="2" />
                 </RelativeLayout>
 
             </LinearLayout>

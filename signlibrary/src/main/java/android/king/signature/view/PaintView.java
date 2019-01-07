@@ -46,7 +46,6 @@ public class PaintView extends View {
     private boolean isFingerEnable = true;
     private boolean isEraser = false;
 
-    private EraserView eraserView;
     /**
      * 是否有绘制
      */
@@ -118,9 +117,7 @@ public class PaintView extends View {
         }
         //橡皮擦
         RelativeLayout parentView = (RelativeLayout) getParent().getParent().getParent();
-        eraserView = parentView.findViewById(R.id.eraser);
-        eraserView.setAlpha(0);//先让EraserView显示，但设置为透明，不然隐藏再显示会有闪屏现象
-        eraser = new Eraser(getResources().getDimensionPixelSize(R.dimen.sign_eraser_size), eraserView);
+        eraser = new Eraser(getResources().getDimensionPixelSize(R.dimen.sign_eraser_size));
     }
 
     /**

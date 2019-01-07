@@ -19,10 +19,6 @@ import android.king.signature.view.EraserView;
 public class Eraser {
 
     private Paint eraserPaint;
-    /**
-     * 橡皮擦指示器
-     */
-    private EraserView eraserView;
 
     /**
      * 画笔路径
@@ -34,8 +30,7 @@ public class Eraser {
     private float mLastX;
     private float mLastY;
 
-    public Eraser(int paintWidth, EraserView view) {
-        this.eraserView = view;
+    public Eraser(int paintWidth) {
         eraserPaint = new Paint();
         eraserPaint.setStyle(Paint.Style.STROKE);
         eraserPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -62,11 +57,6 @@ public class Eraser {
         final float rawY = event.getRawY();
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (eraserView != null) {
-                    eraserView.setX(rawX);
-                    eraserView.setY(rawY);
-                    eraserView.setAlpha(1);
-                }
 
                 mLastX = x;
                 mLastY = y;
@@ -78,22 +68,12 @@ public class Eraser {
                 canvas.drawPath(mPath, eraserPaint);
                 mLastX = x;
                 mLastY = y;
-                if (eraserView != null) {
-                    eraserView.setX(rawX);
-                    eraserView.setY(rawY);
-                }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if (eraserView != null) {
-                    eraserView.setAlpha(0);
-                }
                 break;
             case MotionEvent.ACTION_UP:
                 mPath.lineTo(mLastX, mLastY);
                 canvas.drawPath(mPath, eraserPaint);
-                if (eraserView != null) {
-                    eraserView.setAlpha(0);
-                }
                 break;
         }
         return true;

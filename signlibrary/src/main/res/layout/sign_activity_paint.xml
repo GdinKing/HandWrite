@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rl_container"
@@ -89,8 +88,8 @@
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:background="@drawable/sign_bg_shape"
-        android:padding="10dp">
+        android:padding="1dp"
+        android:background="@drawable/sign_bg_shape">
 
         <android.king.signature.view.HVScrollView
             android:id="@+id/scrollView"
@@ -98,7 +97,6 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerInParent="true"
-            android:background="@drawable/sign_bg_shape"
             android:fadingEdge="none"
             android:overScrollMode="never"
             android:scrollbars="none"
@@ -125,11 +123,4 @@
             app:sealName="asd " />
 
     </RelativeLayout>
-
-    <android.king.signature.view.EraserView
-        android:id="@+id/eraser"
-        android:layout_width="@dimen/sign_eraser_size"
-        android:layout_height="@dimen/sign_eraser_size"
-        android:layout_alignLeft="@+id/sign_container"
-        android:layout_alignTop="@+id/sign_container" />
 </RelativeLayout>
