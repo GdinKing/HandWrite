@@ -40,7 +40,13 @@ public class PaintView extends View {
     private int strokeWidth;
     private BasePen mStokeBrushPen;
 
+    /**
+     * 是否允许写字
+     */
     private boolean isFingerEnable = true;
+    /**
+     * 是否橡皮擦模式
+     */
     private boolean isEraser = false;
 
     /**

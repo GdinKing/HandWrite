@@ -1,10 +1,11 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rl_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:clipToPadding="true"
+    android:orientation="vertical"
     android:fitsSystemWindows="true">
 
     <include
@@ -18,7 +19,6 @@
         android:id="@+id/setting"
         android:layout_width="match_parent"
         android:layout_height="@dimen/sign_grid_toolbar_height"
-        android:layout_below="@id/actionbar"
         android:layout_margin="10dp"
         android:background="@color/white"
         android:gravity="right|center_vertical">
@@ -79,17 +79,17 @@
 
     </RelativeLayout>
 
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sign_border_gray" />
+
     <RelativeLayout
         android:id="@+id/sign_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/setting"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:padding="1dp"
-        android:background="@drawable/sign_bg_shape">
+        android:background="@color/white">
 
         <android.king.signature.view.HVScrollView
             android:id="@+id/scrollView"
@@ -114,4 +114,4 @@
 
 
     </RelativeLayout>
-</RelativeLayout>
+</LinearLayout>

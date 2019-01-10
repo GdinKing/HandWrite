@@ -21,7 +21,7 @@ import android.king.signature.config.PenConfig;
  */
 public class PaintSettingWindow extends PopupWindow {
     public static final String[] PEN_COLORS = new String[]{"#101010", "#027de9", "#0cba02", "#f9d403", "#ec041f"};
-    public static final int[] PEN_SIZES = new int[]{8, 15, 20, 25, 30};
+    public static final int[] PEN_SIZES = new int[]{5, 15, 20, 25, 30};
 
     private Context context;
     private CircleView lastSelectColorView;

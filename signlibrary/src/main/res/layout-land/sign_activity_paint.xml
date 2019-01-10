@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rl_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:id="@+id/rl_container"
+    android:background="@color/white"
     android:clipToPadding="true"
-    android:background="@color/white">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
     <include
         android:id="@+id/actionbar"
         layout="@layout/sign_actionbar"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/sign_actionbar_height" />
+        android:layout_height="@dimen/sign_actionbar_height"/>
+
     <RelativeLayout
         android:id="@+id/setting"
         android:layout_width="match_parent"
         android:layout_height="@dimen/sign_grid_toolbar_height"
-        android:layout_below="@id/actionbar"
         android:layout_margin="10dp"
         android:background="@color/white"
         android:gravity="right|center_vertical">
@@ -80,27 +80,26 @@
     </RelativeLayout>
 
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sign_border_gray" />
+
     <RelativeLayout
         android:id="@+id/sign_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/setting"
-        android:background="@drawable/sign_bg_shape"
-        android:layout_centerInParent="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
-        android:padding="1dp">
+        android:background="@color/white">
 
         <android.king.signature.view.HVScrollView
             android:id="@+id/scrollView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_centerHorizontal="true"
             android:fadingEdge="none"
-            android:scrollbars="none"
             android:overScrollMode="never"
-            android:layout_centerInParent="true"
+            android:scrollbars="none"
             app:childLayoutCenter="false"
             app:fillViewportH="false"
             app:fillViewportV="false"
@@ -110,8 +109,8 @@
                 android:id="@+id/paint_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fadingEdge="none"/>
+                android:fadingEdge="none" />
         </android.king.signature.view.HVScrollView>
 
     </RelativeLayout>
-</RelativeLayout>
+</LinearLayout>

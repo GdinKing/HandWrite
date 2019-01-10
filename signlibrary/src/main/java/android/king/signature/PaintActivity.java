@@ -49,7 +49,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     public static final int CANVAS_MAX_HEIGHT = 3000;
 
     private View mContainerView;
-    private CircleImageView mHandView;
+    private CircleImageView mHandView; //切换 滚动/手写
     private CircleImageView mUndoView;
     private CircleImageView mRedoView;
     private CircleImageView mPenView;
@@ -136,13 +136,12 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
      * @return
      */
     private int getResizeWidth() {
-        int padding = DisplayUtil.dip2px(this, 20);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && dm.widthPixels < dm.heightPixels) {
-            return (int) ((dm.heightPixels - padding) * widthRate);
+            return (int) (dm.heightPixels* widthRate);
         }
-        return (int) ((dm.widthPixels - padding) * widthRate);
+        return (int) (dm.widthPixels * widthRate);
     }
 
     /**
@@ -154,8 +153,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         int toolBarHeight = getResources().getDimensionPixelSize(R.dimen.sign_grid_toolbar_height);
         int actionbarHeight = getResources().getDimensionPixelSize(R.dimen.sign_actionbar_height);
         int statusBarHeight = StatusBarCompat.getStatusBarHeight(this);
-        int otherHeight = toolBarHeight + actionbarHeight + statusBarHeight + DisplayUtil.dip2px(this, 50);
-
+        int otherHeight = toolBarHeight + actionbarHeight + statusBarHeight;
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && dm.widthPixels < dm.heightPixels) {
@@ -269,6 +267,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             showPaintSettingWindow();
 
         } else if (i == R.id.btn_hand) {
+            //切换是否允许写字
             mPaintView.setFingerEnable(!mPaintView.isFingerEnable());
             if (mPaintView.isFingerEnable()) {
                 mHandView.setImage(R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
@@ -421,6 +420,9 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
 
     }
 
+    /**
+     * 画布有操作
+     */
     @Override
     public void onOperateStatusChanged() {
         mUndoView.setEnabled(mPaintView.canUndo());

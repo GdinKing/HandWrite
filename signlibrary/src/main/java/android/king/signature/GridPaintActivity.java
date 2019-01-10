@@ -419,6 +419,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
             setResult(RESULT_CANCELED);
             finish();
         }
+
     }
 
     /**
