@@ -112,14 +112,6 @@
                 android:layout_height="match_parent"
                 android:fadingEdge="none"/>
         </android.king.signature.view.HVScrollView>
-        <android.king.signature.view.SealView
-            android:id="@+id/seal_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/scrollView"
-            android:layout_alignRight="@id/scrollView"
-            android:layout_margin="10dp"
-            app:borderWidth="2dp" />
 
     </RelativeLayout>
 </RelativeLayout>

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
+    <!-- 标题栏高度 -->
     <dimen name="sign_actionbar_height">46dp</dimen>
+    <!-- 标题栏文字大小 -->
     <dimen name="sign_actionbar_text_size">16sp</dimen>
+    <!-- 工具栏按钮padding -->
     <dimen name="sign_tool_padding">12dp</dimen>
+    <!-- 工具栏高度 -->
     <dimen name="sign_grid_toolbar_height">45dp</dimen>
+    <!-- 田字格大小 -->
     <dimen name="sign_grid_size">250dp</dimen>
+    <!-- 工具栏按钮大小 -->
     <dimen name="sign_tool_icon_size">38dp</dimen>
-
+    <!-- 橡皮擦大小 -->
     <dimen name="sign_eraser_size">28dp</dimen>
-
-    <dimen name="seal_small_time_text_size">16sp</dimen>
-    <dimen name="seal_small_text_size">18sp</dimen>
-    <dimen name="seal_time_text_size">18sp</dimen>
-    <dimen name="seal_text_size">20sp</dimen>
-
 
 </resources>

@@ -5,8 +5,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 
 import android.king.signature.config.ControllerPoint;
-import android.king.signature.config.MotionElement;
-import android.king.signature.config.PenConfig;
 
 
 /**
@@ -15,7 +13,7 @@ import android.king.signature.config.PenConfig;
  * @since 2018/06/15
  * @author king
  */
-public class SteelPen extends BasePenExtend {
+public class SteelPen extends BasePen {
 
     @Override
     protected void doPreDraw(Canvas canvas) {

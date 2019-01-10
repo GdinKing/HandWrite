@@ -35,10 +35,4 @@ public class ControllerPoint {
         this.y = point.y;
         this.width = point.width;
     }
-
-    @Override
-    public String toString() {
-        String str = "X = " + x + "; Y = " + y + "; W = " + width;
-        return str;
-    }
 }

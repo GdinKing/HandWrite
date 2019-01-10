@@ -53,8 +53,6 @@ public class Eraser {
     public boolean handleEraserEvent(MotionEvent event, Canvas canvas) {
         final float x = event.getX();
         final float y = event.getY();
-        final float rawX = event.getRawX();
-        final float rawY = event.getRawY();
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
 

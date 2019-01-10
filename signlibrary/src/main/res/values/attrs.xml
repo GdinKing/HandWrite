@@ -9,14 +9,6 @@
         <attr name="showOutBorder" format="boolean"/>
     </declare-styleable>
 
-    <declare-styleable name="SealView">
-        <attr name="sealColor" format="color"/>
-        <attr name="sealTextSize" format="dimension"/>
-        <attr name="sealName" format="string"/>
-        <attr name="borderWidth" format="dimension"/>
-        <attr name="timeTextSize" format="dimension"/>
-    </declare-styleable>
-
     <declare-styleable name="CircleImageView">
         <attr name="civ_border_width" format="dimension" />
         <attr name="civ_border_color" format="color" />

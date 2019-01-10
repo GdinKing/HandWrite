@@ -29,7 +29,6 @@ import android.king.signature.view.CircleView;
 import android.king.signature.view.GuideView;
 import android.king.signature.view.PaintSettingWindow;
 import android.king.signature.view.PaintView;
-import android.king.signature.view.SealView;
 
 
 /**
@@ -56,7 +55,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     private CircleImageView mPenView;
     private CircleImageView mClearView;
     private CircleView mSettingView;
-    private SealView mSealView;
 
     private PaintView mPaintView;
 
@@ -72,7 +70,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     private float widthRate = 1.0f;
     private float heightRate = 1.0f;
     private int bgColor;
-    private boolean showSeal;
     private boolean isCrop;
     private String format;
 
@@ -98,7 +95,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         mPenView = findViewById(R.id.btn_pen);
         mClearView = findViewById(R.id.btn_clear);
         mSettingView = findViewById(R.id.btn_setting);
-        mSealView = findViewById(R.id.seal_view);
         mUndoView.setOnClickListener(this);
         mRedoView.setOnClickListener(this);
         mPenView.setOnClickListener(this);
@@ -171,9 +167,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void initData() {
         isCrop = getIntent().getBooleanExtra("crop", false);
-        String sealName = getIntent().getStringExtra("sealName");
         format = getIntent().getStringExtra("format");
-        String sealLabel = getIntent().getStringExtra("sealLabel");
         bgColor = getIntent().getIntExtra("background", Color.TRANSPARENT);
         String mInitPath = getIntent().getStringExtra("image");
         float bitmapWidth = getIntent().getFloatExtra("width", 1.0f);
@@ -202,20 +196,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             Toast.makeText(getApplicationContext(), "画板高度已超过" + CANVAS_MAX_WIDTH, Toast.LENGTH_LONG).show();
             finish();
             return;
-        }
-        if (!TextUtils.isEmpty(sealName) || !TextUtils.isEmpty(sealLabel)) {
-            mSealView.setVisibility(View.VISIBLE);
-            mSealView.setTextContent(sealName);
-            mSealView.setLabel(sealLabel);
-            showSeal = true;
-        } else {
-            mSealView.setVisibility(View.GONE);
-            showSeal = false;
-        }
-
-        if (mWidth < getResizeWidth()) {
-            mSealView.setTextSize(getResources().getDimension(R.dimen.seal_small_text_size));
-            mSealView.setTimeTextSize(getResources().getDimension(R.dimen.seal_small_time_text_size));
         }
         //初始画板设置
         if (!hasSize && !TextUtils.isEmpty(mInitPath)) {
@@ -423,12 +403,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
                 }
                 if (bgColor != Color.TRANSPARENT) {
                     result = BitmapUtil.drawBgToBitmap(result, bgColor);
-                }
-                if (showSeal) {
-                    Bitmap sealBitmap = mSealView.getBitmap();
-                    if (sealBitmap != null) {
-                        result = BitmapUtil.addWaterMask(result, sealBitmap, bgColor, hasSize);
-                    }
                 }
                 if (result == null) {
                     mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();

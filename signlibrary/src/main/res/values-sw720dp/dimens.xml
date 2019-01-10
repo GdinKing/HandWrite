@@ -10,8 +10,4 @@
 
     <dimen name="sign_eraser_size">28dp</dimen>
 
-    <dimen name="seal_text_size">24sp</dimen>
-    <dimen name="seal_time_text_size">22sp</dimen>
-    <dimen name="seal_small_time_text_size">20sp</dimen>
-    <dimen name="seal_small_text_size">22sp</dimen>
 </resources>

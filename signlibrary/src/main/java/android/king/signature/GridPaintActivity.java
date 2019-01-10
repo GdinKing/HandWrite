@@ -16,7 +16,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,7 +31,6 @@ import android.king.signature.view.GridPaintView;
 import android.king.signature.view.HVScrollView;
 import android.king.signature.view.HandWriteEditView;
 import android.king.signature.view.PaintSettingWindow;
-import android.king.signature.view.SealView;
 
 
 /***
@@ -52,7 +50,6 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
     private CircleImageView mClearView;
     private CircleImageView mEnterView;
     private CircleView mPenCircleView;
-    private SealView mSealView;
     private GridPaintView mPaintView;
     private ProgressDialog mSaveProgressDlg;
     private static final int MSG_SAVE_SUCCESS = 1;
@@ -65,9 +62,6 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
 
     private int bgColor;
     private boolean isCrop;
-    private boolean showSeal;
-    private String sealLabel;
-    private String sealName;
     private String format;
     private int lineSize;
     private int fontSize;
@@ -81,9 +75,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         lineSize = getIntent().getIntExtra("lineLength", 15);
         fontSize = getIntent().getIntExtra("fontSize", 50);
         isCrop = getIntent().getBooleanExtra("crop", false);
-        sealName = getIntent().getStringExtra("sealName");
         format = getIntent().getStringExtra("format");
-        sealLabel = getIntent().getStringExtra("sealLabel");
 
         PenConfig.PAINT_COLOR = PenConfig.getPaintColor(this);
         PenConfig.PAINT_SIZE_LEVEL = PenConfig.getPaintTextLevel(this);
@@ -147,7 +139,6 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         mPenCircleView = findViewById(R.id.pen_color);
         mClearView = findViewById(R.id.clear);
         mEnterView = findViewById(R.id.enter);
-        mSealView = findViewById(R.id.seal_view);
         mEditView = findViewById(R.id.et_view);
         mTextContainer = findViewById(R.id.sv_container);
         mCircleContainer = findViewById(R.id.circle_container);
@@ -177,18 +168,6 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
             }
         });
 
-        mSealView.setTextSize(getResources().getDimension(R.dimen.seal_small_text_size));
-        mSealView.setTimeTextSize(getResources().getDimension(R.dimen.seal_small_time_text_size));
-
-        if (!TextUtils.isEmpty(sealName) || !TextUtils.isEmpty(sealLabel)) {
-            mSealView.setVisibility(View.VISIBLE);
-            mSealView.setTextContent(sealName);
-            mSealView.setLabel(sealLabel);
-            showSeal = true;
-        } else {
-            mSealView.setVisibility(View.GONE);
-            showSeal = false;
-        }
         int maxWidth = lineSize * DisplayUtil.dip2px(this, fontSize);
         if (!isCrop) {
             mEditView.setWidth(maxWidth + 2);
@@ -311,12 +290,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
             }
             Bitmap bm = getWriteBitmap(bgColor);
             bm = BitmapUtil.clearBlank(bm, 20, bgColor);
-            if (showSeal) {
-                Bitmap sealBitmap = mSealView.getBitmap();
-                if (sealBitmap != null) {
-                    bm = BitmapUtil.addWaterMask(bm, sealBitmap, bgColor, false);
-                }
-            }
+
             if (bm == null) {
                 mHandler.obtainMessage(MSG_SAVE_FAILED).sendToTarget();
                 return;

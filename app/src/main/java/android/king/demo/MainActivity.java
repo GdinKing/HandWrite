@@ -61,13 +61,11 @@ public class MainActivity extends AppCompatActivity {
         }
         Intent intent = new Intent(this, PaintActivity.class);
 
-//        intent.putExtra("background", Color.WHITE);//画布背景色，默认透明，也是最终生成图片的背景
+//        intent.putExtra("background", Color.WHITE);//画布背景色，默认透明，也是最终生成图片的背景色
 
-//        intent.putExtra("width", 800); //画布宽度
-//        intent.putExtra("height", 800);//画布高度
+//        intent.putExtra("width", 800); //画布宽度，最大值3000，默认占满布局
+//        intent.putExtra("height", 800);//画布高度，最大值3000，默认占满布局
         intent.putExtra("crop", false);   //最终的图片是否只截取文字区域
-        intent.putExtra("sealName", "张三"); //印章名字
-        intent.putExtra("sealLabel", "2018-12-21"); //印章标签
         intent.putExtra("format", PenConfig.FORMAT_PNG); //图片格式
 //        intent.putExtra("image", imagePath); //初始图片
 
@@ -85,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, GridPaintActivity.class);
         intent.putExtra("background", Color.WHITE);
         intent.putExtra("crop", true);
-        intent.putExtra("sealName", "张三");
-        intent.putExtra("sealLabel", "2018-12-21");
         intent.putExtra("fontSize", 50);  //手写字体大小
         intent.putExtra("format", PenConfig.FORMAT_PNG);
         intent.putExtra("lineLength", 6);   //每行显示字数（超出屏幕支持横向滚动）

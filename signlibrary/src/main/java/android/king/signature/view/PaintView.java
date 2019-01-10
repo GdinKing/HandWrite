@@ -6,9 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.king.signature.util.DisplayUtil;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -18,7 +15,7 @@ import android.widget.RelativeLayout;
 
 import android.king.signature.R;
 import android.king.signature.config.PenConfig;
-import android.king.signature.pen.BasePenExtend;
+import android.king.signature.pen.BasePen;
 import android.king.signature.pen.Eraser;
 import android.king.signature.pen.SteelPen;
 import android.king.signature.util.BitmapUtil;
@@ -41,7 +38,7 @@ public class PaintView extends View {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private int strokeWidth;
-    private BasePenExtend mStokeBrushPen;
+    private BasePen mStokeBrushPen;
 
     private boolean isFingerEnable = true;
     private boolean isEraser = false;
@@ -116,7 +113,6 @@ public class PaintView extends View {
             mStepOperation.addBitmap(mBitmap);
         }
         //橡皮擦
-        RelativeLayout parentView = (RelativeLayout) getParent().getParent().getParent();
         eraser = new Eraser(getResources().getDimensionPixelSize(R.dimen.sign_eraser_size));
     }
 

@@ -12,12 +12,12 @@ import android.king.signature.config.PenConfig;
 import java.util.ArrayList;
 
 /**
- * 画笔操作基类
+ * 画笔基类
  *
  * @author king
  * @since 2018/06/15
  */
-public abstract class BasePenExtend {
+public abstract class BasePen {
     /**
      * 绘制计算的次数，数值越小计算的次数越多
      */

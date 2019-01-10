@@ -12,7 +12,7 @@ import android.view.View;
 
 import android.king.signature.R;
 import android.king.signature.config.PenConfig;
-import android.king.signature.pen.BasePenExtend;
+import android.king.signature.pen.BasePen;
 import android.king.signature.pen.SteelPen;
 import android.king.signature.util.BitmapUtil;
 
@@ -27,7 +27,7 @@ public class GridPaintView extends View {
     private Paint mPaint;
     private Canvas mCanvas;
     private Bitmap mBitmap;
-    private BasePenExtend mStokeBrushPen;
+    private BasePen mStokeBrushPen;
 
     /**
      * 是否有绘制
