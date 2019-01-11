@@ -4,7 +4,7 @@ Android平台原生手写签字控件，功能强大的开源项目。
 
 ## 预览
 
-<img src='preview/blank.jpg' width='250' height='450'/><img src='preview/grid.png' width='250' height='450'/>
+<img src='preview/blank.png' width='250' height='450'/>  <img src='preview/grid.png' width='250' height='450'/>
 
 ## 功能
 
