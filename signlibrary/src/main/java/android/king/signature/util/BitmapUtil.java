@@ -2,6 +2,7 @@ package android.king.signature.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -9,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 
 import android.king.signature.config.PenConfig;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -375,6 +377,17 @@ public class BitmapUtil {
         paint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(inBitmap, 0, 0, paint);
         return outBitmap;
+    }
+
+    /**
+     * 设置ImageView的图片，支持改变图片颜色
+     * @param iv
+     * @param id
+     * @param color
+     */
+    public static void setImage(ImageView iv, int id, int color) {
+        Bitmap bitmap = BitmapFactory.decodeResource(iv.getResources(), id);
+        iv.setImageBitmap(BitmapUtil.changeBitmapColor(bitmap, color));
     }
 
 }

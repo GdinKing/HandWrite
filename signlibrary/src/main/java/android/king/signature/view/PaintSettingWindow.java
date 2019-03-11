@@ -110,6 +110,23 @@ public class PaintSettingWindow extends PopupWindow {
     }
 
     /**
+     * 显示在右上角
+     */
+    public void popAtTopRight() {
+        View sv = rootView.findViewById(R.id.size_container);
+        View cv = rootView.findViewById(R.id.color_container);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(20, 10, 20, 0);
+        lp.gravity = Gravity.CENTER;
+        sv.setLayoutParams(lp);
+        LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp1.setMargins(20, 0, 20, 40);
+        lp1.gravity = Gravity.CENTER;
+        cv.setLayoutParams(lp1);
+        rootView.setBackgroundResource(R.drawable.sign_top_right_pop_bg);
+    }
+
+    /**
      * 显示在右下角
      */
     public void popAtBottomRight() {

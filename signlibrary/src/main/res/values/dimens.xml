@@ -12,7 +12,7 @@
     <!-- 田字格大小 -->
     <dimen name="sign_grid_size">250dp</dimen>
     <!-- 工具栏按钮大小 -->
-    <dimen name="sign_tool_icon_size">38dp</dimen>
+    <dimen name="sign_tool_icon_size">35dp</dimen>
     <!-- 橡皮擦大小 -->
     <dimen name="sign_eraser_size">28dp</dimen>
 

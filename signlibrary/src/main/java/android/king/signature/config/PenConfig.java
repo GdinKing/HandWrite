@@ -27,7 +27,7 @@ public class PenConfig {
     /**
      * 笔锋控制值,越小笔锋越粗
      */
-    public static final float DIS_VEL_CAL_FACTOR = 0.006f;
+    public static final float DIS_VEL_CAL_FACTOR = 0.008f;
 
 
     /**

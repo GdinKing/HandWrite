@@ -124,6 +124,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
         mEnterView.setImage(R.drawable.sign_ic_enter, PenConfig.THEME_COLOR);
         mSpaceView.setImage(R.drawable.sign_ic_space, PenConfig.THEME_COLOR);
         mDeleteView.setImage(R.drawable.sign_ic_delete, PenConfig.THEME_COLOR);
+
         mHandler = new Handler(this);
 
     }

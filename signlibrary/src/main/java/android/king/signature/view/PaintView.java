@@ -103,8 +103,6 @@ public class PaintView extends View {
         this.mWidth = width;
         this.mHeight = height;
 
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
         mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_4444);
         mStokeBrushPen = new SteelPen();
 

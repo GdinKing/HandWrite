@@ -17,7 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import android.king.signature.config.PenConfig;
@@ -26,7 +26,6 @@ import android.king.signature.util.StatusBarCompat;
 import android.king.signature.util.SystemUtil;
 import android.king.signature.view.CircleImageView;
 import android.king.signature.view.CircleView;
-import android.king.signature.view.GuideView;
 import android.king.signature.view.PaintSettingWindow;
 import android.king.signature.view.PaintView;
 
@@ -49,11 +48,11 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
     public static final int CANVAS_MAX_HEIGHT = 3000;
 
     private View mContainerView;
-    private CircleImageView mHandView; //切换 滚动/手写
-    private CircleImageView mUndoView;
-    private CircleImageView mRedoView;
-    private CircleImageView mPenView;
-    private CircleImageView mClearView;
+    private ImageView mHandView; //切换 滚动/手写
+    private ImageView mUndoView;
+    private ImageView mRedoView;
+    private ImageView mPenView;
+    private ImageView mClearView;
     private CircleView mSettingView;
 
     private PaintView mPaintView;
@@ -87,7 +86,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         View mCancelView = findViewById(R.id.tv_cancel);
         View mOkView = findViewById(R.id.tv_ok);
 
-        mContainerView = findViewById(R.id.sign_container);
+        mContainerView = findViewById(R.id.scrollView);
         mPaintView = findViewById(R.id.paint_view);
         mHandView = findViewById(R.id.btn_hand);
         mUndoView = findViewById(R.id.btn_undo);
@@ -119,13 +118,13 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         mSettingView.setRadiusLevel(PenConfig.PAINT_SIZE_LEVEL);
 
         setThemeColor(PenConfig.THEME_COLOR);
-        mClearView.setImage(R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
-        mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
-        mRedoView.setImage(R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mUndoView.setImage(R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mClearView.setImage(R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mSettingView.setOutBorderColor(PenConfig.THEME_COLOR);
-        mHandView.setImage(R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
+        BitmapUtil.setImage(mClearView, R.drawable.sign_ic_clear, PenConfig.THEME_COLOR);
+        BitmapUtil.setImage(mPenView, R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
+        BitmapUtil.setImage(mRedoView, R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        BitmapUtil.setImage(mUndoView, R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        BitmapUtil.setImage(mClearView, R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+//        mSettingView.setOutBorderColor(PenConfig.THEME_COLOR);
+        BitmapUtil.setImage(mHandView, R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
 
     }
 
@@ -139,7 +138,7 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && dm.widthPixels < dm.heightPixels) {
-            return (int) (dm.heightPixels* widthRate);
+            return (int) (dm.heightPixels * widthRate);
         }
         return (int) (dm.widthPixels * widthRate);
     }
@@ -211,8 +210,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         if (bgColor != Color.TRANSPARENT) {
             mPaintView.setBackgroundColor(bgColor);
         }
-        //显示隐藏拖拽按钮
-        hideShowDrag();
     }
 
     /**
@@ -230,35 +227,8 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         if (mPaintView != null && !hasSize) {
             mPaintView.resize(mPaintView.getLastBitmap(), resizeWidth, resizeHeight);
         }
-        hideShowDrag();
     }
 
-    /**
-     * 控制防误触按钮是否显示
-     */
-    private void hideShowDrag() {
-        ViewTreeObserver vto2 = mContainerView.getViewTreeObserver();
-        vto2.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                mContainerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                //显示操作指引
-                if (PenConfig.getFirst(PaintActivity.this)) {
-                    showGuideView();
-                    PenConfig.setFirst(PaintActivity.this, false);
-                }
-
-                int limitWidth = mContainerView.getWidth() - DisplayUtil.dip2px(PaintActivity.this, 20);
-                int limitHeight = mContainerView.getHeight() - DisplayUtil.dip2px(PaintActivity.this, 20);
-                if (mPaintView.getBitmap().getWidth() > limitWidth || mPaintView.getBitmap().getHeight() > limitHeight) {
-                    mHandView.setVisibility(View.VISIBLE);
-                } else {
-                    //根据是否平板来显示防误触按钮
-                    mHandView.setVisibility(SystemUtil.isTablet(PaintActivity.this) ? View.VISIBLE : View.GONE);
-                }
-            }
-        });
-    }
 
     @Override
     public void onClick(View v) {
@@ -270,9 +240,9 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
             //切换是否允许写字
             mPaintView.setFingerEnable(!mPaintView.isFingerEnable());
             if (mPaintView.isFingerEnable()) {
-                mHandView.setImage(R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
+                BitmapUtil.setImage(mHandView, R.drawable.sign_ic_hand, PenConfig.THEME_COLOR);
             } else {
-                mHandView.setImage(R.drawable.sign_ic_drag, PenConfig.THEME_COLOR);
+                BitmapUtil.setImage(mHandView, R.drawable.sign_ic_drag, PenConfig.THEME_COLOR);
             }
 
         } else if (i == R.id.btn_clear) {
@@ -287,10 +257,10 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         } else if (i == R.id.btn_pen) {
             if (!mPaintView.isEraser()) {
                 mPaintView.setPenType(PaintView.TYPE_ERASER);
-                mPenView.setImage(R.drawable.sign_ic_eraser, PenConfig.THEME_COLOR);
+                BitmapUtil.setImage(mPenView, R.drawable.sign_ic_eraser, PenConfig.THEME_COLOR);
             } else {
                 mPaintView.setPenType(PaintView.TYPE_PEN);
-                mPenView.setImage(R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
+                BitmapUtil.setImage(mPenView, R.drawable.sign_ic_pen, PenConfig.THEME_COLOR);
             }
         } else if (i == R.id.tv_ok) {
             save();
@@ -341,9 +311,9 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         contentView.measure(SystemUtil.makeDropDownMeasureSpec(settingWindow.getWidth()),
                 SystemUtil.makeDropDownMeasureSpec(settingWindow.getHeight()));
 
-        int padding = DisplayUtil.dip2px(this, 10);
-        settingWindow.popAtBottomRight();
-        settingWindow.showAsDropDown(mSettingView, mSettingView.getWidth() - settingWindow.getContentView().getMeasuredWidth() + 2 * padding, 10);
+        int padding = DisplayUtil.dip2px(this, 45);
+        settingWindow.popAtTopRight();
+        settingWindow.showAsDropDown(mSettingView, -250, -2 * padding - settingWindow.getContentView().getMeasuredHeight());
 
     }
 
@@ -429,20 +399,10 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         mRedoView.setEnabled(mPaintView.canRedo());
         mClearView.setEnabled(!mPaintView.isEmpty());
 
-        mRedoView.setImage(R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mUndoView.setImage(R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-        mClearView.setImage(R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
-    }
+        BitmapUtil.setImage(mRedoView, R.drawable.sign_ic_redo, mPaintView.canRedo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        BitmapUtil.setImage(mUndoView, R.drawable.sign_ic_undo, mPaintView.canUndo() ? PenConfig.THEME_COLOR : Color.LTGRAY);
+        BitmapUtil.setImage(mClearView, R.drawable.sign_ic_clear, !mPaintView.isEmpty() ? PenConfig.THEME_COLOR : Color.LTGRAY);
 
-    /**
-     * 显示操作指引
-     */
-    private void showGuideView() {
-        View viewParent = getWindow().getDecorView();
-        if (viewParent == null)
-            return;
-        GuideView guideView = new GuideView(this, viewParent, mHandView, mPenView);
-        guideView.show();
     }
 
     @Override

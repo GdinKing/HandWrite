@@ -8,15 +8,15 @@
         <activity
             android:name=".GridPaintActivity"
             android:configChanges="screenSize|keyboard|keyboardHidden|orientation"
-            android:windowSoftInputMode="stateHidden|stateAlwaysHidden"
+            android:hardwareAccelerated="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            />
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" />
 
         <activity
             android:name=".PaintActivity"
             android:configChanges="screenSize|orientation|keyboard|keyboardHidden"
-            android:hardwareAccelerated="false"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:hardwareAccelerated="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

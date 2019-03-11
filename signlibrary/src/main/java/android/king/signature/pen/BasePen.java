@@ -24,7 +24,6 @@ public abstract class BasePen {
     public static final int STEP_FACTOR = 20;
 
     protected ArrayList<ControllerPoint> mHWPointList = new ArrayList<>();
-    protected ArrayList<ControllerPoint> mPointList = new ArrayList<>();
     protected ControllerPoint mLastPoint = new ControllerPoint(0, 0);
     protected Paint mPaint;
 
@@ -103,7 +102,6 @@ public abstract class BasePen {
             mPaint = paint;
             paint = null;
         }
-        mPointList.clear();
         mHWPointList.clear();
         //记录down的控制点的信息
         ControllerPoint curPoint = new ControllerPoint(mElement.x, mElement.y);
@@ -111,7 +109,6 @@ public abstract class BasePen {
         //down下的点的宽度
         curPoint.width = (float) mLastWidth;
         mLastVel = 0;
-        mPointList.add(curPoint);
         //记录当前的点
         mLastPoint = curPoint;
     }
@@ -134,7 +131,7 @@ public abstract class BasePen {
         double curVel = curDis * PenConfig.DIS_VEL_CAL_FACTOR;
         double curWidth;
         //点的集合少，我们得必须改变宽度,每次点击的down的时候，这个事件
-        if (mPointList.size() < 2) {
+        if (mHWPointList.size() < 2) {
 
             curWidth = calcNewWidth(curVel, mLastVel, curDis, 1.7,
                     mLastWidth);
@@ -149,7 +146,6 @@ public abstract class BasePen {
         }
         //每次移动的话，这里赋值新的值
         mLastWidth = curWidth;
-        mPointList.add(curPoint);
         doMove(curDis);
         mLastPoint = curPoint;
     }
@@ -158,7 +154,7 @@ public abstract class BasePen {
      * 手指抬起来的事件
      */
     public void onUp(MotionElement mElement, Canvas canvas) {
-        if (mPointList.size() == 0) {
+        if (mHWPointList.size() == 0) {
             return;
         }
         mCurPoint = new ControllerPoint(mElement.x, mElement.y);
@@ -166,7 +162,6 @@ public abstract class BasePen {
         double deltaY = mCurPoint.y - mLastPoint.y;
         double curDis = Math.hypot(deltaX, deltaY);
         mCurPoint.width = 0;
-        mPointList.add(mCurPoint);
 
         mBezier.addNode(mCurPoint);
 
@@ -209,7 +204,6 @@ public abstract class BasePen {
      * 清除缓存的触摸点
      */
     public void clear() {
-        mPointList.clear();
         mHWPointList.clear();
     }
 
