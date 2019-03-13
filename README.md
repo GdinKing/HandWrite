@@ -29,6 +29,3 @@ Android平台原生手写签字控件，功能强大的开源项目。
 
 > 如果你在使用过程发现Bug，欢迎在issue中向我提出
 
-友情赞助：
-
-<img src='preview/alipay.jpg' width='188' height='300'/>
