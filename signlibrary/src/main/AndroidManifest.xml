@@ -9,14 +9,14 @@
             android:name=".GridPaintActivity"
             android:configChanges="screenSize|keyboard|keyboardHidden|orientation"
             android:hardwareAccelerated="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/HandWriteTheme"
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" />
 
         <activity
             android:name=".PaintActivity"
             android:configChanges="screenSize|orientation|keyboard|keyboardHidden"
             android:hardwareAccelerated="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/HandWriteTheme" />
     </application>
 
 </manifest>

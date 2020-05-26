@@ -10,8 +10,6 @@
         <item name="colorPrimary">@color/sign_toolbar_bg</item>
         <item name="colorPrimaryDark">@color/sign_toolbar_bg</item>
         <item name="colorAccent">@color/sign_toolbar_bg</item>
-        <item name="android:windowBackground">@color/white</item>
-        <item name="background">@color/white</item>
     </style>
 
 </resources>

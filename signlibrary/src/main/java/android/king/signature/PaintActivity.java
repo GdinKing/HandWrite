@@ -47,7 +47,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
      */
     public static final int CANVAS_MAX_HEIGHT = 3000;
 
-    private View mContainerView;
     private ImageView mHandView; //切换 滚动/手写
     private ImageView mUndoView;
     private ImageView mRedoView;
@@ -86,7 +85,6 @@ public class PaintActivity extends BaseActivity implements View.OnClickListener,
         View mCancelView = findViewById(R.id.tv_cancel);
         View mOkView = findViewById(R.id.tv_ok);
 
-        mContainerView = findViewById(R.id.scrollView);
         mPaintView = findViewById(R.id.paint_view);
         mHandView = findViewById(R.id.btn_hand);
         mUndoView = findViewById(R.id.btn_undo);

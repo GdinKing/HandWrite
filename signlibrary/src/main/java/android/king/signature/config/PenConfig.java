@@ -25,7 +25,7 @@ public class PenConfig {
     public static int PAINT_COLOR = Color.parseColor(PaintSettingWindow.PEN_COLORS[0]);
 
     /**
-     * 笔锋控制值,越小笔锋越粗
+     * 笔锋控制值,越小笔锋越粗,越不明显
      */
     public static final float DIS_VEL_CAL_FACTOR = 0.008f;
 

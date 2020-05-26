@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("crop", true);
         intent.putExtra("fontSize", 50);  //手写字体大小
         intent.putExtra("format", PenConfig.FORMAT_PNG);
-        intent.putExtra("lineLength", 6);   //每行显示字数（超出屏幕支持横向滚动）
+        intent.putExtra("lineLength", 10);   //每行显示字数（超出屏幕支持横向滚动）
         startActivityForResult(intent, 100);
     }
 

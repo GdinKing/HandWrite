@@ -177,7 +177,7 @@ public class GridPaintActivity extends BaseActivity implements View.OnClickListe
             mEditView.setWidth(maxWidth * 2 / 3);
             mEditView.setMaxWidth(maxWidth * 2 / 3);
         }
-        mEditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize * 3 / 4);
+        mEditView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         mEditView.setLineHeight(DisplayUtil.dip2px(this, fontSize));
         mEditView.setHorizontallyScrolling(false);
         mEditView.requestFocus();
