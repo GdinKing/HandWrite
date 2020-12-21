@@ -28,7 +28,7 @@ import android.king.signature.util.SystemUtil;
  */
 public class HandWriteEditView extends AppCompatEditText {
 
-    private float lineHeight = 150;
+    private float lineHeight = 150f;
     boolean reLayout = false;
     private TextWatch textWatcher;
 
@@ -54,7 +54,7 @@ public class HandWriteEditView extends AppCompatEditText {
 
         //禁止选择复制粘贴
         SystemUtil.disableCopyAndPaste(this);
-        lineHeight = DisplayUtil.dip2px(getContext(),50);
+        lineHeight = (float)DisplayUtil.dip2px(getContext(),50f);
         addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
